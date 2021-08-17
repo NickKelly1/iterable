@@ -1,20 +1,21 @@
 {
-  "name": "@nkp/--NPM_PACKAGE_NAME--",
-  "version": "0.0.1",
-  "description": "--PACKAGE_DESCRIPTION--",
-  "main": "dist/index.js",
-  "module": "dist/index.es.js",
+  "name": "@nkp/iterable",
+  "sideEffects": false,
+  "version": "0.0.0",
+  "description": "Iteration utility for synchronous iterators like arrays, sets, maps and generators.",
+  "main": "es/index.js",
+  "module": "cjs/index.es.js",
   "author": "Nick Kelly",
-  "homepage": "https://github.com/NickKelly1/--GITHUB_PACKAGE_NAME--#readme",
-  "readme": "https://github.com/NickKelly1/--GITHUB_PACKAGE_NAME--#readme",
+  "homepage": "https://github.com/NickKelly1/iterable#readme",
+  "readme": "https://github.com/NickKelly1/iterable#readme",
   "license": "SEE LICENSE IN LICENSE",
   "private": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/NickKelly1/--GITHUB_PACKAGE_NAME--"
+    "url": "https://github.com/NickKelly1/iterable"
   },
   "bugs": {
-    "url": "https://github.com/NickKelly1/--GITHUB_PACKAGE_NAME--/issues"
+    "url": "https://github.com/NickKelly1/iterable/issues"
   },
   "keywords": [
     "TypeScript",
@@ -24,23 +25,31 @@
     "test": "jest -c config/jest.config.ts",
     "build": "rimraf dist && rollup -c config/rollup.config.js",
     "test:watch": "jest -c config/jest.config.ts --watch",
-    "prepublishOnly": "npm run build"
+    "publish:prepare": "cp package.json dist && cp LICENSE dist && cp README.md dist",
+    "lint": "eslint . --ext '*/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint . --ext '*/**/*.{js,jsx,ts,tsx}' --fix",
+    "upgrade": "npm-check --update"
   },
   "devDependencies": {
     "@jest/types": "^26.6.2",
-    "@rollup/plugin-commonjs": "^19.0.2",
+    "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@types/jest": "^26.0.24",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.1",
+    "@typescript-eslint/parser": "^4.29.1",
+    "eslint": "^7.32.0",
     "jest": "^27.0.6",
+    "npm-check": "^4.1.4",
     "rimraf": "^3.0.2",
+    "rollup": "^2.56.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.30.0",
     "ts-jest": "^27.0.4",
-    "ts-node": "^10.1.0",
+    "ts-node": "^10.2.0",
     "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "@nkp/maybe": "^0.0.5"
   }
 }
