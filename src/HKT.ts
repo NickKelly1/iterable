@@ -25,17 +25,21 @@ export interface URIToKind<A> {
 }
 
 // signature of a higher kind type
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface HKT<URI, A> {
-  readonly _URI: URI;
-  readonly _A: A;
+  readonly URI: URI;
+  readonly __T: A;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type URIS = keyof URIToKind<any>;
+export type GetURI<H extends HKT<any, any>>  = H['URI'];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type URIs = keyof URIToKind<any>;
 
 // If this is a URI, extract it from the URI map (URIToKind)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Kind<URI extends URIS, A> = URI extends URIS ? URIToKind<A>[URI] : any;
+export type Kind<URI extends URIs, A> = URI extends URIs ? URIToKind<A>[URI] : any;
 
 
 /**

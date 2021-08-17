@@ -1,18 +1,18 @@
 import { Maybe } from '@nkp/maybe';
-import { Kind, URIS } from '../HKT';
+import { HKT, Kind, URIs } from '../HKT';
 import { Pipeline } from '../pipeline/pipeline';
 import { Lake } from '../lake/lake';
-import { Pipelineable } from '../utils/types';
+import { Pipelineable, unpipeline } from '../utils/types';
 import { River } from '../river/river';
 
 // declare URI
-export const URI_HOSE = 'Hose';
-export type URI_HOSE = typeof URI_HOSE;
+export const HoseURI = 'Hose';
+export type HoseURI = typeof HoseURI;
 
 // register for usage as higher kind type
 declare module '../HKT' {
   interface URIToKind<A> {
-    readonly [URI_HOSE]: Hose<A>;
+    readonly [HoseURI]: Hose<A>;
   }
 }
 
@@ -53,8 +53,8 @@ declare module '../HKT' {
  * new Hose(() => map.values())
  * ```
  */
-export class Hose<T> extends Pipeline<T> implements IterableIterator<T> {
-  public readonly _URI = URI_HOSE;
+export class Hose<T> extends Pipeline<T> implements IterableIterator<T>, HKT<HoseURI, T> {
+  public readonly URI = HoseURI;
 
   /**
    * Only use one iterable
@@ -68,14 +68,7 @@ export class Hose<T> extends Pipeline<T> implements IterableIterator<T> {
 
   constructor(root: Pipelineable<T>) {
     super();
-    switch (typeof root) {
-    case 'function':
-      this.iterable = root()[Symbol.iterator]();
-      break;
-    case 'object':
-      this.iterable = root[Symbol.iterator]();
-      break;
-    }
+    this.iterable = unpipeline(root)[Symbol.iterator]();
   }
 
   /**
@@ -95,8 +88,9 @@ export class Hose<T> extends Pipeline<T> implements IterableIterator<T> {
   /**
    * Take the next value
    */
-  take(): Maybe<T> {
-    const next = this.next();
+  take<H1 extends URIs>(this: Kind<H1, T>): Maybe<T> {
+    const self = this as Hose<T>;
+    const next = self.next();
     if (next.done) return Maybe.none;
     return Maybe.some(next.value);
   }
@@ -106,14 +100,17 @@ export class Hose<T> extends Pipeline<T> implements IterableIterator<T> {
    *
    * @param callbackfn
    */
-  exhaust(callbackfn: (item: T, i: number, stop: () => void) => unknown): void {
+  exhaust<H1 extends URIs>(
+    this: Kind<H1, T>,
+    callbackfn: (item: T, i: number, stop: () => void) => unknown,
+  ): void {
     let stopped = false;
     const stop = () => { stopped = true; };
     let i = 0;
     for (const item of this) {
-      i += 1;
       callbackfn(item, i, stop);
       if (stopped) break;
+      i += 1;
     }
   }
 
@@ -122,7 +119,7 @@ export class Hose<T> extends Pipeline<T> implements IterableIterator<T> {
    *
    * @returns
    */
-  toLake<S extends URIS = this['_URI']>(this: Kind<S, T>): Lake<T> {
+  toLake<S extends URIs>(this: Kind<S, T>): Lake<T> {
     return new Lake(this.toArray());
   }
 
@@ -131,7 +128,7 @@ export class Hose<T> extends Pipeline<T> implements IterableIterator<T> {
    *
    * @returns
    */
-  toRiver<S extends URIS = this['_URI']>(this: Kind<S, T>): River<T> {
+  toRiver<S extends URIs>(this: Kind<S, T>): River<T> {
     return new River(this.toArray());
   }
 }

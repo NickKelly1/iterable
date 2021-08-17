@@ -1,15 +1,16 @@
 import { Maybe } from '@nkp/maybe';
+import { HKT, Kind, URIs } from '../HKT';
 import { Pipeline } from '../pipeline/pipeline';
 import { Pipelineable } from '../utils/types';
 
 // declare URI
-export const URI_RIVER = 'River';
-export type URI_RIVER = typeof URI_RIVER;
+export const RiverURI = 'River';
+export type RiverURI = typeof RiverURI;
 
 // register for usage as higher kind type
 declare module '../HKT' {
   interface URIToKind<A> {
-    readonly [URI_RIVER]: River<A>;
+    readonly [RiverURI]: River<A>;
   }
 }
 
@@ -24,8 +25,8 @@ declare module '../HKT' {
  * Items are written to and held in memory, versus the lake
  * where they're created only on-demand.
  */
-export class River<T> extends Pipeline<T> {
-  public override readonly _URI = URI_RIVER;
+export class River<T> extends Pipeline<T> implements HKT<RiverURI, T> {
+  public override readonly URI = RiverURI;
 
   protected readonly root: T[];
 
@@ -49,7 +50,10 @@ export class River<T> extends Pipeline<T> {
    *
    * @param callbackfn
    */
-  forEach(callbackfn: (item: T, i: number, stop: () => void) => unknown): void {
+  forEach<H1 extends URIs>(
+    this: Kind<H1, T>,
+    callbackfn: (item: T, i: number, stop: () => void) => unknown
+  ): Kind<H1, T> {
     let stopped = false;
     const stop = () => { stopped = true; };
     let i = 0;
@@ -58,6 +62,7 @@ export class River<T> extends Pipeline<T> {
       callbackfn(item, i, stop);
       if (stopped) break;
     }
+    return this;
   }
 
   /**
@@ -88,13 +93,17 @@ export class River<T> extends Pipeline<T> {
    * @param index
    * @returns
    */
-  item(index: number): Maybe<T> {
+  item<H1 extends URIs>(
+    this: Kind<H1, T>,
+    index: number
+  ): Maybe<T> {
+    const self = this as River<T>;
     if (index >= 0) {
-      if (index >= this.root.length) return Maybe.none;
-      return Maybe.some(this.root[index]!);
+      if (index >= self.root.length) return Maybe.none;
+      return Maybe.some(self.root[index]!);
     } else {
-      if (-index > this.root.length) return Maybe.none;
-      return Maybe.some(this.root[this.root.length - index]!);
+      if (-index > self.root.length) return Maybe.none;
+      return Maybe.some(self.root[self.root.length - index]!);
     }
   }
 }

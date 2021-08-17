@@ -1,17 +1,17 @@
 import { Maybe } from '@nkp/maybe';
-import { Kind, URIS } from '../HKT';
+import { HKT, Kind, URIs } from '../HKT';
 import { Pipeline } from '../pipeline/pipeline';
-import { Pipelineable } from '../utils/types';
+import { Pipelineable, unpipeline } from '../utils/types';
 import { $TODO } from '../utils/utility-types';
 
 // declare URI
-export const URI_LAKE = 'Lake';
-export type URI_LAKE = typeof URI_LAKE;
+export const LakeURI = 'Lake';
+export type LakeURI = typeof LakeURI;
 
 // register for usage as higher kind type
 declare module '../HKT' {
   interface URIToKind<A> {
-    readonly [URI_LAKE]: Lake<A>;
+    readonly [LakeURI]: Lake<A>;
   }
 }
 
@@ -51,8 +51,8 @@ declare module '../HKT' {
  * new Lake(() => map.values())
  * ```
  */
-export class Lake<T> extends Pipeline<T> {
-  public override readonly _URI = URI_LAKE;
+export class Lake<T> extends Pipeline<T> implements HKT<LakeURI, T> {
+  public override readonly URI = LakeURI;
 
   constructor(protected readonly root: Pipelineable<T>) {
     super();
@@ -73,14 +73,7 @@ export class Lake<T> extends Pipeline<T> {
    * @inheritdoc
    */
   * [Symbol.iterator](): IterableIterator<T> {
-    switch (typeof this.root) {
-    case 'function':
-      yield * this.root();
-      break;
-    case 'object':
-      yield * this.root;
-      break;
-    }
+    yield * unpipeline(this.root);
   }
 
   /**
@@ -88,7 +81,7 @@ export class Lake<T> extends Pipeline<T> {
    *
    * Runs all transformations and rebases to an array of the resulting items
    */
-  rebase<S extends URIS>(this: Kind<S, T>): Kind<S, T> {
+  rebase<S extends URIs>(this: Kind<S, T>): Kind<S, T> {
     return new (this.constructor as $TODO)(this.toArray());
   }
 
@@ -97,7 +90,7 @@ export class Lake<T> extends Pipeline<T> {
    *
    * @param callbackfn
    */
-  forEach<S extends URIS>(
+  forEach<S extends URIs>(
     this: Kind<S, T>,
     callbackfn: (item: T, i: number, stop: () => void) => unknown,
   ): Kind<S, T> {
@@ -169,7 +162,7 @@ export class Lake<T> extends Pipeline<T> {
     } else {
       // i is negative
       // collect as array and reverse index
-      const arr = (this as Kind<URI_LAKE, T>).toArray();
+      const arr = (this as Kind<LakeURI, T>).toArray();
       if (-index > arr.length) return Maybe.none;
       return Maybe.some(arr[arr.length - index]!);
     }

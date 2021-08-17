@@ -1,4 +1,5 @@
-import { Kind, URIS } from '../HKT';
+import { GetURI, Kind, URIs } from '../HKT';
+import { Pipelineable, unpipeline } from '../utils/types';
 import { $TODO } from '../utils/utility-types';
 
 
@@ -8,14 +9,13 @@ import { $TODO } from '../utils/utility-types';
  * To extend, register your subclass as a higher kind type - view ./HKT.ts
  */
 export abstract class Pipeline<T> implements Iterable<T> {
-  public abstract readonly _URI: URIS;
-  public readonly _T!: T;
+  public abstract readonly URI: URIs;
+  public readonly __T!: T;
 
   /**
    * Iterate over the instance
    */
   abstract [Symbol.iterator](): IterableIterator<T>;
-
 
   /**
    * Map the pipeline
@@ -25,10 +25,10 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * @param callbackfn
    * @returns
    */
-  map<U, S extends URIS = this['_URI']>(
-    this: Kind<S, T>,
+  map<U, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
     callbackfn: (item: T) => U
-  ): Kind<S, U> {
+  ): Kind<H1, U> {
     const self = this;
     // const self = this;
     const iteratorable = function * (): Iterable<U> {
@@ -36,7 +36,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
         yield callbackfn(item);
       }
     };
-    return new (this.constructor as $TODO)(iteratorable) as Kind<S, U>;
+    return new (this.constructor as $TODO)(iteratorable) as Kind<H1, U>;
   }
 
   /**
@@ -47,17 +47,17 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * @param callbackfn
    * @returns
    */
-  flatMap<U, V extends URIS = this['_URI'], S extends URIS = this['_URI']>(
-    this: Kind<S, T>,
-    callbackfn: (item: T) => Kind<V, U>,
-  ): Kind<S, U> {
+  flatMap<U, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    callbackfn: (item: T) => Pipelineable<U>,
+  ): Kind<H1, U> {
     const self = this;
     const iteratorable = function * (): Iterable<U> {
       for (const item of self) {
-        yield * callbackfn(item);
+        yield * unpipeline(callbackfn(item));
       }
     };
-    return new (this.constructor as $TODO)(iteratorable) as Kind<S, U>;
+    return new (this.constructor as $TODO)(iteratorable) as Kind<H1, U>;
   }
 
   /**
@@ -66,16 +66,16 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * @param this
    * @returns
    */
-  flatten<U, V extends URIS = this['_URI'], S extends URIS = this['_URI']>(
-    this: Kind<S, Kind<V, U>>,
-  ): Kind<V, U> {
+  flatten<U, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, Iterable<U>>,
+  ): Kind<H1, U> {
     const self = this;
     const iteratorable = function * (): Iterable<U> {
       for (const item of self) {
         yield * item;
       }
     };
-    return new (this.constructor as $TODO)(iteratorable) as Kind<V, U>;
+    return new (this.constructor as $TODO)(iteratorable) as Kind<H1, U>;
   }
 
   /**
@@ -84,7 +84,10 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * @param callbackfn
    * @returns
    */
-  filter<S extends URIS = this['_URI']>(this: Kind<S, T>, callbackfn: (item: T) => boolean): Kind<S, T> {
+  filter<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    callbackfn: (item: T) => boolean
+  ): Kind<H1, T> {
     const self = this;
     const iteratorable = function * () {
       for (const item of self) {
@@ -99,7 +102,10 @@ export abstract class Pipeline<T> implements Iterable<T> {
    *
    * @param value
    */
-  exclude<S extends URIS = this['_URI']>(this: Kind<S, T>, ...values: T[]): Kind<S, T> {
+  exclude<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    ...values: T[]
+  ): Kind<H1, T> {
     const _values = new Set(values);
     return this.filter((item) => !_values.has(item));
   }
@@ -109,7 +115,10 @@ export abstract class Pipeline<T> implements Iterable<T> {
    *
    * @param value
    */
-  pick<S extends URIS = this['_URI']>(this: Kind<S, T>, ...values: T[]): Kind<S, T> {
+  pick<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    ...values: T[]
+  ): Kind<H1, T> {
     const _values = new Set(values);
     return this.filter((item) => _values.has(item));
   }
@@ -119,7 +128,10 @@ export abstract class Pipeline<T> implements Iterable<T> {
    *
    * @returns
    */
-  push<S extends URIS = this['_URI']>(this: Kind<S, T>, ...pushed: T[]): Kind<S, T> {
+  push<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    ...pushed: T[]
+  ): Kind<H1, T> {
     const self = this;
     const pushIterator = function * () {
       yield * self;
@@ -133,7 +145,10 @@ export abstract class Pipeline<T> implements Iterable<T> {
    *
    * @returns
    */
-  concat<S extends URIS = this['_URI']>(this: Kind<S, T>, items: Iterable<T>): Kind<S, T> {
+  concat<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    items: Iterable<T>
+  ): Kind<H1, T> {
     return this.push(...items);
   }
 
@@ -145,15 +160,15 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * @param sort
    * @returns
    */
-  sort<S extends URIS = this['_URI']>(
-    this: Kind<S, T>,
+  sort<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
     sort:
       | 'asc' | 'ASC'
       | 'desc' | 'DESC'
       | 1 | '1'
       | -1 | '-1'
       | ((a: T, b: T) => number)
-  ): Kind<S, T> {
+  ): Kind<H1, T> {
     const self = this;
 
     let direction: 1 | -1 = 1;
@@ -186,7 +201,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
    *
    * @returns
    */
-  toArray<S extends URIS = this['_URI']>(this: Kind<S, T>): T[] {
+  toArray<H1 extends URIs>(this: Kind<H1, T>): T[] {
     const array: T[] = Array.from(this);
     return array;
   }
@@ -196,7 +211,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
    *
    * @returns
    */
-  toSet<S extends URIS = this['_URI']>(this: Kind<S, T>): Set<T> {
+  toSet<H1 extends URIs>(this: Kind<H1, T>): Set<T> {
     const set: Set<T> = new Set(Array.from(this));
     return set;
   }
