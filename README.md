@@ -1,8 +1,8 @@
 # @nkp/iterable
 
-[![npm version](https://badge.fury.io/js/%40nkp%2Fiterable.svg)](https://www.npmjs.com/package/@nkp/collect)
-[![Node.js Package](https://github.com/NickKelly1/nkp-collect/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/NickKelly1/nkp-collect/actions/workflows/npm-publish.yml)
-![Known Vulnerabilities](https://snyk.io/test/github/NickKelly1/nkp-collect/badge.svg)
+[![npm version](https://badge.fury.io/js/%40nkp%2Fiterable.svg)](https://www.npmjs.com/package/@nkp/iterable)
+[![Node.js Package](https://github.com/NickKelly1/nkp-iterable/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/NickKelly1/nkp-iterable/actions/workflows/npm-publish.yml)
+![Known Vulnerabilities](https://snyk.io/test/github/NickKelly1/nkp-iterable/badge.svg)
 
 Collection utility classes for synchronous and lazy iteration over iterables like arrays, sets, maps and generators.
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.3 - 2021-08-16
+
+### Changed
+
+- Fixed readme badges
+
 ## 0.0.2 - 2021-08-16
 
 ### Added
