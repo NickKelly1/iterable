@@ -54,29 +54,29 @@ describe('Lake', () => {
         expect(called[2]).toEqual(3);
       });
       it('set', () => {
-        const collection = new Lake(new Set([1, 2, 3,]));
+        const pipeline = new Lake(new Set([1, 2, 3,]));
         const called: number[] = [];
-        collection.forEach(item => { called.push(item); });
+        pipeline.forEach(item => { called.push(item); });
         expect(called[0]).toEqual(1);
         expect(called[1]).toEqual(2);
         expect(called[2]).toEqual(3);
       });
       it('map', () => {
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
-        const collection = new Lake(map);
+        const pipeline = new Lake(map);
         const called: [number, number][] = [];
-        collection.forEach(item => { called.push(item); });
+        pipeline.forEach(item => { called.push(item); });
         expect(called[0]).toEqual([1, 1,]);
         expect(called[1]).toEqual([2, 2,]);
         expect(called[2]).toEqual([3, 3,]);
       });
       it('generator', () => {
-        const collection = new Lake(function * (): Iterable<number> {
+        const pipeline = new Lake(function * (): Iterable<number> {
           yield 1; yield 2; yield 3;
         });
-        expect(collection.item(0).value).toEqual(1);
-        expect(collection.item(1).value).toEqual(2);
-        expect(collection.item(2).value).toEqual(3);
+        expect(pipeline.item(0).value).toEqual(1);
+        expect(pipeline.item(1).value).toEqual(2);
+        expect(pipeline.item(2).value).toEqual(3);
       });
     });
   });
@@ -128,16 +128,16 @@ describe('Lake', () => {
       });
       it('map', () => {
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
-        const collection = new Lake(map);
-        expect(collection.first().value).toEqual([1, 1,]);
+        const pipeline = new Lake(map);
+        expect(pipeline.first().value).toEqual([1, 1,]);
       });
       it('generator', () => {
-        const collection = new Lake(function * (): Iterable<number> {
+        const pipeline = new Lake(function * (): Iterable<number> {
           yield 1;
           yield 2;
           yield 3;
         });
-        expect(collection.first().value).toEqual(1);
+        expect(pipeline.first().value).toEqual(1);
       });
     });
   });

@@ -182,7 +182,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
   }
 
   /**
-   * Trasnform the collection to an array
+   * Trasnform the Pipeline to an array
    *
    * @returns
    */
@@ -192,7 +192,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
   }
 
   /**
-   * Trasnform the collection to an array
+   * Trasnform the Pipeline to an array
    *
    * @returns
    */
