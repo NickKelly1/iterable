@@ -2,6 +2,16 @@ import { GetURI, Kind, URIs } from '../HKT';
 import { Pipelineable, unpipeline } from '../utils/types';
 import { $TODO } from '../utils/utility-types';
 
+// declare URI
+export const PipelineURI = 'Pipeline';
+export type PipelineURI = typeof PipelineURI;
+
+// register for usage as higher kind type
+declare module '../HKT' {
+  interface URIToKind<A> {
+    readonly [PipelineURI]: Pipeline<A>;
+  }
+}
 
 /**
  * Extendable base Pipeline
@@ -27,13 +37,15 @@ export abstract class Pipeline<T> implements Iterable<T> {
    */
   map<U, H1 extends URIs = GetURI<this>>(
     this: Kind<H1, T>,
-    callbackfn: (item: T) => U
+    callbackfn: (value: T, currentIndex: number) => U
   ): Kind<H1, U> {
     const self = this;
     // const self = this;
     const iteratorable = function * (): Iterable<U> {
+      let i = 0;
       for (const item of self) {
-        yield callbackfn(item);
+        yield callbackfn(item, i);
+        i += 1;
       }
     };
     return new (this.constructor as $TODO)(iteratorable) as Kind<H1, U>;
@@ -49,12 +61,14 @@ export abstract class Pipeline<T> implements Iterable<T> {
    */
   flatMap<U, H1 extends URIs = GetURI<this>>(
     this: Kind<H1, T>,
-    callbackfn: (item: T) => Pipelineable<U>,
+    callbackfn: (value: T, currentIndex: number) => Pipelineable<U>,
   ): Kind<H1, U> {
     const self = this;
     const iteratorable = function * (): Iterable<U> {
+      let i = 0;
       for (const item of self) {
-        yield * unpipeline(callbackfn(item));
+        yield * unpipeline(callbackfn(item, i));
+        i += 1;
       }
     };
     return new (this.constructor as $TODO)(iteratorable) as Kind<H1, U>;
@@ -86,12 +100,14 @@ export abstract class Pipeline<T> implements Iterable<T> {
    */
   filter<H1 extends URIs = GetURI<this>>(
     this: Kind<H1, T>,
-    callbackfn: (item: T) => boolean
+    callbackfn: (value: T, currentIndex: number) => boolean
   ): Kind<H1, T> {
     const self = this;
     const iteratorable = function * () {
+      let i = 0;
       for (const item of self) {
-        if (callbackfn(item)) yield item;
+        if (callbackfn(item, i)) yield item;
+        i += 1;
       }
     };
     return new (this.constructor as $TODO)(iteratorable);
@@ -153,6 +169,23 @@ export abstract class Pipeline<T> implements Iterable<T> {
   }
 
   /**
+   * Unshift items onto the pipeline
+   *
+   * @returns
+   */
+  unshift<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    ...unshifted: T[]
+  ): Kind<H1, T> {
+    const self = this;
+    const pushIterator = function * () {
+      yield * unshifted;
+      yield * self;
+    };
+    return new (this.constructor as $TODO)(pushIterator);
+  }
+
+  /**
    * Sort items on the the pipeline
    *
    * Has sensible deafaults
@@ -196,12 +229,143 @@ export abstract class Pipeline<T> implements Iterable<T> {
     return new (this.constructor as $TODO)(iteratorable);
   }
 
+
+  /**
+   * Reverse the pipeline
+   *
+   * @param this
+   * @param
+   * @returns
+   */
+  reverse<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+  ): Kind<H1, T> {
+    const self = this as Pipeline<T>;
+    function * iteratorable() {
+      const arr: T[] = self.toArray().reverse();
+      yield * arr;
+    }
+    return new (this.constructor as $TODO)(iteratorable);
+  }
+
+
+  /**
+   * Slice values from the pipeline
+   *
+   * @param this
+   * @param start
+   * @param end
+   * @returns
+   */
+  slice<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    start?: number,
+    end?: number,
+  ): Kind<H1, T> {
+    const self = this as Pipeline<T>;
+    const _start = start ?? 0;
+    const _end = end;
+    const doesEnd = end !== undefined;
+    function * iteratorable() {
+      let i = 0;
+      for (const item of self) {
+        if (doesEnd && (i >= (_end as number))) break;
+        if (i >= _start) yield item;
+        i += 1;
+      }
+    }
+    return new (this.constructor as $TODO)(iteratorable);
+  }
+
+
+  /**
+   * Reduce the pipeline
+   *
+   * @param this
+   * @param
+   * @returns
+   */
+  reduce<U, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    callbackfn: ((previousValue: T, currentValue: U, currentIndex: number) => U),
+    initial: U,
+  ): U {
+    let current: U = initial;
+    let i = 0;
+    for (const item of this) {
+      current = callbackfn(item, current, i),
+      i += 1;
+    }
+    return current;
+  }
+
+
+  /**
+   * Reduce Right the pipeline
+   *
+   * @param this
+   * @param
+   * @returns
+   */
+  reduceRight<U, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    callbackfn: ((previousValue: T, currentValue: U, currentIndex: number) => U),
+    initial: U,
+  ): U {
+    let current: U = initial;
+    let i = 0;
+    for (const item of this.reverse()) {
+      current = callbackfn(item, current, i),
+      i += 1;
+    }
+    return current;
+  }
+
+
+  /**
+   * Is every callback true?
+   *
+   * @param this
+   * @param callbackfn
+   * @returns
+   */
+  every<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    callbackfn: (value: T, currentIndex: number) => boolean,
+  ): boolean {
+    let i = 0;
+    for (const item of this) {
+      if (!callbackfn(item, i)) return false;
+      i += 1;
+    }
+    return true;
+  }
+
+  /**
+   * Is some value true?
+   *
+   * @param this
+   * @param callbackfn
+   * @returns
+   */
+  some<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    callbackfn: (value: T, currentIndex: number) => boolean,
+  ): boolean {
+    let i = 0;
+    for (const item of this) {
+      if (callbackfn(item, i)) return true;
+      i += 1;
+    }
+    return false;
+  }
+
   /**
    * Trasnform the Pipeline to an array
    *
    * @returns
    */
-  toArray<H1 extends URIs>(this: Kind<H1, T>): T[] {
+  toArray<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): T[] {
     const array: T[] = Array.from(this);
     return array;
   }
@@ -211,7 +375,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
    *
    * @returns
    */
-  toSet<H1 extends URIs>(this: Kind<H1, T>): Set<T> {
+  toSet<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): Set<T> {
     const set: Set<T> = new Set(Array.from(this));
     return set;
   }

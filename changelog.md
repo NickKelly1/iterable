@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.0.4 - 2021-xx-xx
+
+### Added
+
+- `Pipeline.prototype.reverse`
+- `Pipeline.prototype.slice`
+- `Pipeline.prototype.reduce`
+- `Pipeline.prototype.reduceRight`
+- `Pipeline.prototype.every`
+- `Pipeline.prototype.some`
+- `River.prototype.indexOf`
+- `River.prototype.find`
+- `Dam.prototype.find`
+
+### Changed
+
+- Changed name of `Lake` to `Dam`
+- Changed name of `Hose` to `Bucket`
+- Changed name of `Dam.prototype.item` to `Dam.prototype.at`
+- Changed name of `River.prototype.item` to `River.prototype.at`
+
 ## 0.0.3 - 2021-08-16
 
 ### Changed

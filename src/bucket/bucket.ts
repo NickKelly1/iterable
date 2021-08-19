@@ -1,35 +1,35 @@
 import { Maybe } from '@nkp/maybe';
 import { HKT, Kind, URIs } from '../HKT';
 import { Pipeline } from '../pipeline/pipeline';
-import { Lake } from '../lake/lake';
+import { Dam } from '../dam/dam';
 import { Pipelineable, unpipeline } from '../utils/types';
 import { River } from '../river/river';
 
 // declare URI
-export const HoseURI = 'Hose';
-export type HoseURI = typeof HoseURI;
+export const BucketURI = 'Bucket';
+export type BucketURI = typeof BucketURI;
 
 // register for usage as higher kind type
 declare module '../HKT' {
   interface URIToKind<A> {
-    readonly [HoseURI]: Hose<A>;
+    readonly [BucketURI]: Bucket<A>;
   }
 }
 
 /**
- * Iterable Hose
+ * Iterable Bucket
  *
- * Items rest calmy in the lake and shuts off once completed
- * Once completed it cannot be restarted
+ * Items are at rest rest until they are poured out
+ * Once emptied the Bucket cannot be replayed
  *
  *  - memory: light
  *  - cpu: light
  *
- * Items are created on-demand when an endpoint function
- * like exhaust(), toArray(), toSet()
- * Items are otherwise not stored in memory
+ * Items are created on-demand when an endpoint function like exhaust(),
+ * toArray(), toSet() are called
+ * Items are otherwise not stored in the Bucket's memory
  *
- * Do ! NOT ! use directly with exhaustive iterators like:
+ * Primarily for use with exhaustable iterators like:
  *  - Array.prototype.values
  *  - Set.prototype.values
  *  - Map.prototype.keys
@@ -39,22 +39,14 @@ declare module '../HKT' {
  * as these iterators, once exhausted, cannot be reset to their initial state
  * and will stop producing values
  *
- * However, you may use a factory function that returns an iterator
- *
- * Bad:
- * ```ts
- * const map = new Map([[1, {}, [2, {}], [3, {}]])
- * new Hose(map.values());
- * ```
- *
  * Good:
  * ```ts
  * const map = new Map([[1, {}, [2, {}], [3, {}]]);
- * new Hose(() => map.values())
+ * new Bucket(map.values())
  * ```
  */
-export class Hose<T> extends Pipeline<T> implements IterableIterator<T>, HKT<HoseURI, T> {
-  public readonly URI = HoseURI;
+export class Bucket<T> extends Pipeline<T> implements IterableIterator<T>, HKT<BucketURI, T> {
+  public readonly URI = BucketURI;
 
   /**
    * Only use one iterable
@@ -89,7 +81,7 @@ export class Hose<T> extends Pipeline<T> implements IterableIterator<T>, HKT<Hos
    * Take the next value
    */
   take<H1 extends URIs>(this: Kind<H1, T>): Maybe<T> {
-    const self = this as Hose<T>;
+    const self = this as Bucket<T>;
     const next = self.next();
     if (next.done) return Maybe.none;
     return Maybe.some(next.value);
@@ -115,16 +107,16 @@ export class Hose<T> extends Pipeline<T> implements IterableIterator<T>, HKT<Hos
   }
 
   /**
-   * Convert the hose into a lake
+   * Convert the bucket into a dam
    *
    * @returns
    */
-  toLake<S extends URIs>(this: Kind<S, T>): Lake<T> {
-    return new Lake(this.toArray());
+  toDam<S extends URIs>(this: Kind<S, T>): Dam<T> {
+    return new Dam(this.toArray());
   }
 
   /**
-   * Convert the hose into a river
+   * Convert the Bucket into a River
    *
    * @returns
    */

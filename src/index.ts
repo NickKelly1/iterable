@@ -1,13 +1,13 @@
 import { River } from './river/river';
-import { Hose } from './hose/hose';
-import { Lake } from './lake/lake';
+import { Bucket } from './bucket/bucket';
+import { Dam } from './dam/dam';
 import { Pipelineable } from './utils/types';
 
 export * from './pipeline/pipeline';
 export * from './utils/types';
 export * from './river/river';
-export * from './lake/lake';
-export * from './hose/hose';
+export * from './dam/dam';
+export * from './bucket/bucket';
 
 /**
  * Create a river
@@ -20,21 +20,21 @@ export function toRiver<T>(value: Pipelineable<T>): River<T> {
 }
 
 /**
- * Create a hose
+ * Create a bucket
  *
  * @param value
  * @returns
  */
-export function toHose<T>(value: Pipelineable<T>): Hose<T> {
-  return new Hose(value);
+export function toBucket<T>(value: Pipelineable<T>): Bucket<T> {
+  return new Bucket(value);
 }
 
 /**
- * Creat a lake
+ * Creat a dam
  *
  * @param value
  * @returns
  */
-export function toLake<T>(value: Lake<T>): Lake<T> {
-  return new Lake(value);
+export function toDam<T>(value: Dam<T>): Dam<T> {
+  return new Dam(value);
 }

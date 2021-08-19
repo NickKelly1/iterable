@@ -10,11 +10,11 @@ Uses the `@nkp/maybe` library for extracting values.
 
 Extendable via higher kind types.
 
-Exposes three utility classes, `River`, `Lake` and `Hose`.
+Exposes three utility classes, `River`, `Dam` and `Bucket`.
 
 ## Collection types
 
-type | river | lake | hose |
+type | river | dam | bucket |
 --- | --- | --- | --- |
 **similar to** | array | generator | generator |
 **cpu** | light | heavy | light |
@@ -25,11 +25,11 @@ type | river | lake | hose |
 
 `River` is the most familiar iterable type.
 Like an array its items exist in memory at all times.
-Rivers are memory heavy and cpu light. River's flow methods, `map`, `filter`, `pick`, `exclude`, cause instantaneous trasnformation of it's items as opposed to a `Lake` which only runs transforms when items are requested.
+Rivers are memory heavy and cpu light. River's flow methods, `map`, `filter`, `pick`, `exclude`, cause instantaneous trasnformation of it's items as opposed to a `Dam` which only runs transforms when items are requested.
 
-- cpu: light
-- memory: light
-- exhausts: no
+- **cpu**: light
+- **memory**: light
+- **exhausts**: no
 
 ```ts
 import { River, toRiver } from '@nkp/iterable';
@@ -52,22 +52,22 @@ console.log(called); // true
 console.log(river.toArray()); // [4, 3]
 ```
 
-### Lake
+### Dam
 
-- cpu: heavy
-- memory: light
-- exhausts: no
+- **cpu**: light
+- **memory**: light
+- **exhausts**: no
 
-`Lake` is a kind of lazy stream. `Lake` does not store its items in memory, only a reference to the initial iterable provided to it.
-`Lake` stores transformations and doesn't execute them until the caller requests data from it.
+`Dam` is a kind of lazy stream. `Dam` does not store its items in memory, only a reference to the initial iterable provided to it.
+`Dam` stores transformations and doesn't execute them until the caller requests data from it.
 
 ```ts
-import { Lake, toLake } from '@nkp/iterable';
+import { Dam, toDam } from '@nkp/iterable';
 
-const lake: Lake = toLake([1, 2, 3, 4]);
+const dam: Dam = toDam([1, 2, 3, 4]);
 let called = false;
 
-lake
+dam
   .map(n => {
     called = true;
     n + 1;
@@ -79,29 +79,29 @@ lake
 // transformations have not executed yet
 console.log(called); // false
 
-lake.toArray(); // [4, 3]
+dam.toArray(); // [4, 3]
 
 // now that data has been requeted, all transformations have run
 console.log(console.log(called)); // true
 ```
 
-`Lake` is considered heavy on CPU because every time data is requested, every transformation must run again.
+`Dam` is considered heavy on CPU because every time data is requested, every transformation must run again.
 
 ```ts
-const lake = new Lake([1, 2, 3]).map(n => n + 1).exclude(4).sort();
-lake.toArray(); // all transformations run on [1, 2, 3]
-lake.toArray(); // all transformations run on [1, 2, 3] (again)
-lake.item(1); // all transformations run on [1, 2, 3] (again)
+const dam = new Dam([1, 2, 3]).map(n => n + 1).exclude(4).sort();
+dam.toArray(); // all transformations run on [1, 2, 3]
+dam.toArray(); // all transformations run on [1, 2, 3] (again)
+dam.item(1); // all transformations run on [1, 2, 3] (again)
 // heavy on CPU for frequent data request
 ```
 
-### Hose
+### Bucket
 
-- cpu: heavy
-- memory: light
-- exhausts: yes
+- **cpu**: heavy
+- **memory**: light
+- **exhausts**: yes
 
-Hose is like `Lake` but once shuts off after completion and cannot restart. It's suitable for iterables that not cycle, lke:
+`Bucket` is like `Dam` but once emptied replayed. It's suitable for iterables that do not cycle such as:
 
 - `Array.prototype.vaues`
 - `Set.prototype.vaues`
@@ -109,15 +109,15 @@ Hose is like `Lake` but once shuts off after completion and cannot restart. It's
 - `Map.prototype.keys`
 - `Map.prototype.entries`
 
-If a hose has not been exhausted, it's remaining contents can be collected into a `River` or `Lake` by calling `Hose.prototype.toRiver()` or `Hose.prototype.toLake()`
+If a bucket has not been exhausted, it's remaining contents can be collected into a `River` or `Dam` by calling `bucket.toRiver()` or `bucket.toDam()`
 
 ```ts
-import { Hose, toHose } from '@nkp/iterable';
+import { Bucket, toBucket } from '@nkp/iterable';
 
-const hose: Hose = toHose(new Set([1, 2, 3, 4]).values());
+const bucket: Bucket = toBucket(new Set([1, 2, 3, 4]).values());
 let called = false;
 
-hose
+bucket
   .map(n => {
     called = true;
     n + 1;
@@ -129,16 +129,16 @@ hose
 // transformations have not executed yet
 console.log(called); // false
 
-hose.toArray(); // [4, 3]
+bucket.toArray(); // [4, 3]
 
 // now that data has been requeted, all transformations have run
 console.log(console.log(called)); // true
 
-// the hoses inner iterable has been exhaused so the hose is done
-console.log(hose.toArray()); // []
+// the buckets inner iterable has been exhaused so the bucket is done
+console.log(bucket.toArray()); // []
 ```
 
-`Hose` does not expose additional helpers methods, like `Lake`, to access individual items because such methods would cause irreversible mutation and on the inner iterable and may return different values on every call. Instead, `Hose` exposts itself as an iterable with a `next()` method.
+`Bucket` does not expose additional helpers methods, like `Dam`, to access individual items because such methods would cause irreversible mutation and on the inner iterable and may return different values on every call. Instead, `Bucket` exposts itself as an iterable with a `next()` method.
 
 ## Usage
 

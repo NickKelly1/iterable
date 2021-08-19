@@ -1,5 +1,5 @@
 import { Maybe } from '@nkp/maybe';
-import { HKT, Kind, URIs } from '../HKT';
+import { GetURI, HKT, Kind, URIs } from '../HKT';
 import { Pipeline } from '../pipeline/pipeline';
 import { Pipelineable } from '../utils/types';
 
@@ -22,8 +22,7 @@ declare module '../HKT' {
  *  - memory: heavy
  *  - cpu: light
  *
- * Items are written to and held in memory, versus the lake
- * where they're created only on-demand.
+ * Items are written to and held in memory
  */
 export class River<T> extends Pipeline<T> implements HKT<RiverURI, T> {
   public override readonly URI = RiverURI;
@@ -50,7 +49,7 @@ export class River<T> extends Pipeline<T> implements HKT<RiverURI, T> {
    *
    * @param callbackfn
    */
-  forEach<H1 extends URIs>(
+  forEach<H1 extends URIs = GetURI<this>>(
     this: Kind<H1, T>,
     callbackfn: (item: T, i: number, stop: () => void) => unknown
   ): Kind<H1, T> {
@@ -71,14 +70,44 @@ export class River<T> extends Pipeline<T> implements HKT<RiverURI, T> {
    * @returns
    */
   first(): Maybe<T> {
-    return this.item(0);
+    return this.at(0);
   }
+
+  /**
+   * Find an item in the iterable
+   */
+  find<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    callbackfn: (value: T, currentIndex: number) => boolean,
+  ): Maybe<T> {
+    let i = 0;
+    for (const item of this) {
+      if (callbackfn(item, i)) return Maybe.some(item);
+      i += 1;
+    }
+    return Maybe.none;
+  }
+
+
+  /**
+   * Get the index of a value
+   */
+  indexOf<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    value: T,
+  ): Maybe<number> {
+    const self = this as River<T>;
+    const index = self.root.indexOf(value);
+    if (index !== -1) return Maybe.some(index);
+    return Maybe.none;
+  }
+
 
   /**
    * Get the current size of the pipeline if run
    */
-  getSize(): number {
-    return this.root.length;
+  getSize<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): number {
+    return (this as River<T>).root.length;
   }
 
   /**
@@ -93,7 +122,7 @@ export class River<T> extends Pipeline<T> implements HKT<RiverURI, T> {
    * @param index
    * @returns
    */
-  item<H1 extends URIs>(
+  at<H1 extends URIs>(
     this: Kind<H1, T>,
     index: number
   ): Maybe<T> {

@@ -9,36 +9,36 @@ describe('River', () => {
     }
   });
 
-  describe('item(...)', () => {
+  describe('at(...)', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = new River([1, 2, 3,]);
-        expect(pipeline.item(0).value).toEqual(1);
-        expect(pipeline.item(1).value).toEqual(2);
-        expect(pipeline.item(2).value).toEqual(3);
+        expect(pipeline.at(0).value).toEqual(1);
+        expect(pipeline.at(1).value).toEqual(2);
+        expect(pipeline.at(2).value).toEqual(3);
       });
       it('set', () => {
         const pipeline = new River(new Set([1, 2, 3,]));
-        expect(pipeline.item(0).value).toEqual(1);
-        expect(pipeline.item(1).value).toEqual(2);
-        expect(pipeline.item(2).value).toEqual(3);
+        expect(pipeline.at(0).value).toEqual(1);
+        expect(pipeline.at(1).value).toEqual(2);
+        expect(pipeline.at(2).value).toEqual(3);
       });
       it('map', () => {
         const map = new Map<number, number>([
           [1, 1,], [2, 2,], [3, 3,],
         ]);
         const pipeline = new River(map);
-        expect(pipeline.item(0).value).toEqual([1, 1,]);
-        expect(pipeline.item(1).value).toEqual([2, 2,]);
-        expect(pipeline.item(2).value).toEqual([3, 3,]);
+        expect(pipeline.at(0).value).toEqual([1, 1,]);
+        expect(pipeline.at(1).value).toEqual([2, 2,]);
+        expect(pipeline.at(2).value).toEqual([3, 3,]);
       });
       it('generator', () => {
         const pipeline = new River(function * (): Iterable<number> {
           yield 1; yield 2; yield 3;
         });
-        expect(pipeline.item(0).value).toEqual(1);
-        expect(pipeline.item(1).value).toEqual(2);
-        expect(pipeline.item(2).value).toEqual(3);
+        expect(pipeline.at(0).value).toEqual(1);
+        expect(pipeline.at(1).value).toEqual(2);
+        expect(pipeline.at(2).value).toEqual(3);
       });
     });
   });
@@ -74,9 +74,9 @@ describe('River', () => {
         const pipeline = new River(function * (): Iterable<number> {
           yield 1; yield 2; yield 3;
         });
-        expect(pipeline.item(0).value).toEqual(1);
-        expect(pipeline.item(1).value).toEqual(2);
-        expect(pipeline.item(2).value).toEqual(3);
+        expect(pipeline.at(0).value).toEqual(1);
+        expect(pipeline.at(1).value).toEqual(2);
+        expect(pipeline.at(2).value).toEqual(3);
       });
     });
   });
@@ -85,23 +85,23 @@ describe('River', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = new River([1, 2, 3,]).map(n => n + 1);
-        expect(pipeline.item(0).value).toEqual(2);
-        expect(pipeline.item(1).value).toEqual(3);
-        expect(pipeline.item(2).value).toEqual(4);
+        expect(pipeline.at(0).value).toEqual(2);
+        expect(pipeline.at(1).value).toEqual(3);
+        expect(pipeline.at(2).value).toEqual(4);
       });
       it('set', () => {
         const pipeline = new River(new Set([1, 2, 3,])).map(n => n + 1);
-        expect(pipeline.item(0).value).toEqual(2);
-        expect(pipeline.item(1).value).toEqual(3);
-        expect(pipeline.item(2).value).toEqual(4);
+        expect(pipeline.at(0).value).toEqual(2);
+        expect(pipeline.at(1).value).toEqual(3);
+        expect(pipeline.at(2).value).toEqual(4);
       });
       it('map', () => {
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
         const pipeline = new River(map).map<[number, number]>(
           ([a, b,]) => ([a + 1, b + 1,]));
-        expect(pipeline.item(0).value).toEqual([2, 2,]);
-        expect(pipeline.item(1).value).toEqual([3, 3,]);
-        expect(pipeline.item(2).value).toEqual([4, 4,]);
+        expect(pipeline.at(0).value).toEqual([2, 2,]);
+        expect(pipeline.at(1).value).toEqual([3, 3,]);
+        expect(pipeline.at(2).value).toEqual([4, 4,]);
       });
       it('generator', () => {
         const pipeline = new River(function * (): Iterable<number> {
@@ -109,9 +109,9 @@ describe('River', () => {
           yield 2;
           yield 3;
         }).map(n => n + 1);
-        expect(pipeline.item(0).value).toEqual(2);
-        expect(pipeline.item(1).value).toEqual(3);
-        expect(pipeline.item(2).value).toEqual(4);
+        expect(pipeline.at(0).value).toEqual(2);
+        expect(pipeline.at(1).value).toEqual(3);
+        expect(pipeline.at(2).value).toEqual(4);
       });
     });
   });
@@ -146,16 +146,16 @@ describe('River', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = new River([1, 2, 3,]).filter((v) => v !== 2);
-        expect(pipeline.item(1).value).toEqual(3);
+        expect(pipeline.at(1).value).toEqual(3);
       });
       it('set', () => {
         const pipeline = new River(new Set([1, 2, 3,])).filter((v) => v !== 2);
-        expect(pipeline.item(1).value).toEqual(3);
+        expect(pipeline.at(1).value).toEqual(3);
       });
       it('map', () => {
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
         const pipeline = new River(map).filter(([v,]) => v !== 2);
-        expect(pipeline.item(1).value).toEqual([3, 3,]);
+        expect(pipeline.at(1).value).toEqual([3, 3,]);
       });
       it('generator', () => {
         const pipeline = new River(function * (): Iterable<number> {
@@ -163,7 +163,7 @@ describe('River', () => {
           yield 2;
           yield 3;
         }).filter((v) => v !== 2);
-        expect(pipeline.item(1).value).toEqual(3);
+        expect(pipeline.at(1).value).toEqual(3);
       });
     });
   });
@@ -172,16 +172,16 @@ describe('River', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = new River([1, 2, 3,]).exclude(1, 2);
-        expect(pipeline.item(0).value).toEqual(3);
+        expect(pipeline.at(0).value).toEqual(3);
       });
       it('set', () => {
         const pipeline = new River(new Set([1, 2, 3,])).exclude(1, 3);
-        expect(pipeline.item(0).value).toEqual(2);
+        expect(pipeline.at(0).value).toEqual(2);
       });
       it('map', () => {
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
         const pipeline = new River(() => map.values()).exclude(3, 1);
-        expect(pipeline.item(0).value).toEqual(2);
+        expect(pipeline.at(0).value).toEqual(2);
       });
       it('generator', () => {
         const pipeline = new River(function * (): Iterable<number> {
@@ -189,7 +189,7 @@ describe('River', () => {
           yield 2;
           yield 3;
         }).exclude(2);
-        expect(pipeline.item(1).value).toEqual(3);
+        expect(pipeline.at(1).value).toEqual(3);
       });
     });
   });
@@ -198,16 +198,16 @@ describe('River', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = new River([1, 2, 3,]).pick(1, 3);
-        expect(pipeline.item(1).value).toEqual(3);
+        expect(pipeline.at(1).value).toEqual(3);
       });
       it('set', () => {
         const pipeline = new River(new Set([1, 2, 3,])).pick(1, 3);
-        expect(pipeline.item(1).value).toEqual(3);
+        expect(pipeline.at(1).value).toEqual(3);
       });
       it('map', () => {
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
         const pipeline = new River(map.values()).pick(3, 1);
-        expect(pipeline.item(1).value).toEqual(3);
+        expect(pipeline.at(1).value).toEqual(3);
       });
       it('generator', () => {
         const pipeline = new River(function * (): Iterable<number> {
@@ -215,7 +215,7 @@ describe('River', () => {
           yield 2;
           yield 3;
         }).pick(2);
-        expect(pipeline.item(0).value).toEqual(2);
+        expect(pipeline.at(0).value).toEqual(2);
       });
     });
   });
@@ -251,19 +251,19 @@ describe('River', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = new River([1, 2, 3,]).push(4, 5);
-        expect(pipeline.item(3).value).toEqual(4);
-        expect(pipeline.item(4).value).toEqual(5);
+        expect(pipeline.at(3).value).toEqual(4);
+        expect(pipeline.at(4).value).toEqual(5);
       });
       it('set', () => {
         const pipeline = new River(new Set([1, 2, 3,])).push(4, 5);
-        expect(pipeline.item(3).value).toEqual(4);
-        expect(pipeline.item(4).value).toEqual(5);
+        expect(pipeline.at(3).value).toEqual(4);
+        expect(pipeline.at(4).value).toEqual(5);
       });
       it('map', () => {
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
         const pipeline = new River(() => map.values()).push(4, 5);
-        expect(pipeline.item(3).value).toEqual(4);
-        expect(pipeline.item(4).value).toEqual(5);
+        expect(pipeline.at(3).value).toEqual(4);
+        expect(pipeline.at(4).value).toEqual(5);
       });
       it('generator', () => {
         const generator = function * (): Iterable<number> {
@@ -272,8 +272,8 @@ describe('River', () => {
           yield 3;
         };
         const pipeline = new River(generator).push(4, 5);
-        expect(pipeline.item(3).value).toEqual(4);
-        expect(pipeline.item(4).value).toEqual(5);
+        expect(pipeline.at(3).value).toEqual(4);
+        expect(pipeline.at(4).value).toEqual(5);
       });
     });
   });
@@ -283,19 +283,19 @@ describe('River', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = new River([1, 2, 3,]).concat([4, 5,]);
-        expect(pipeline.item(3).value).toEqual(4);
-        expect(pipeline.item(4).value).toEqual(5);
+        expect(pipeline.at(3).value).toEqual(4);
+        expect(pipeline.at(4).value).toEqual(5);
       });
       it('set', () => {
         const pipeline = new River(new Set([1, 2, 3,])).concat([4, 5,]);
-        expect(pipeline.item(3).value).toEqual(4);
-        expect(pipeline.item(4).value).toEqual(5);
+        expect(pipeline.at(3).value).toEqual(4);
+        expect(pipeline.at(4).value).toEqual(5);
       });
       it('map', () => {
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
         const pipeline = new River(() => map.values()).concat([4, 5,]);
-        expect(pipeline.item(3).value).toEqual(4);
-        expect(pipeline.item(4).value).toEqual(5);
+        expect(pipeline.at(3).value).toEqual(4);
+        expect(pipeline.at(4).value).toEqual(5);
       });
       it('generator', () => {
         const generator = function * (): Iterable<number> {
@@ -304,8 +304,8 @@ describe('River', () => {
           yield 3;
         };
         const pipeline = new River(generator).concat([4, 5,]);
-        expect(pipeline.item(3).value).toEqual(4);
-        expect(pipeline.item(4).value).toEqual(5);
+        expect(pipeline.at(3).value).toEqual(4);
+        expect(pipeline.at(4).value).toEqual(5);
       });
     });
   });
