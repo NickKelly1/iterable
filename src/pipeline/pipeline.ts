@@ -19,7 +19,7 @@ declare module '../HKT' {
  * To extend, register your subclass as a higher kind type - view ./HKT.ts
  */
 export abstract class Pipeline<T> implements Iterable<T> {
-  public abstract readonly URI: URIs;
+  public abstract readonly URI: URIs = PipelineURI;
   public readonly __T!: T;
 
   /**
