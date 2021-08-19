@@ -1,7 +1,6 @@
-import { Maybe } from '@nkp/maybe';
 import { GetURI, HKT, Kind, URIs } from '../HKT';
-import { Pipeline } from '../pipeline/pipeline';
-import { Pipelineable, unpipeline } from '../utils/types';
+import { Repeatable } from '../repeatable/repeatable';
+import { Pipelineable } from '../utils/types';
 import { $TODO } from '../utils/utility-types';
 
 // declare URI
@@ -51,7 +50,7 @@ declare module '../HKT' {
  * new Dam(() => map.values())
  * ```
  */
-export class Dam<T> extends Pipeline<T> implements HKT<DamURI, T> {
+export class Dam<T> extends Repeatable<T> implements HKT<DamURI, T> {
   public override readonly URI = DamURI;
 
   constructor(protected readonly root: Pipelineable<T>) {
@@ -70,117 +69,11 @@ export class Dam<T> extends Pipeline<T> implements HKT<DamURI, T> {
   }
 
   /**
-   * @inheritdoc
-   */
-  * [Symbol.iterator](): IterableIterator<T> {
-    yield * unpipeline(this.root);
-  }
-
-  /**
    * Collect the Dam's contents
    *
    * Runs all transformations and rebases to an array of the resulting items
    */
-  rebase<H1 extends URIs>(this: Kind<H1, T>): Kind<H1, T> {
-    return new (this.constructor as $TODO)(this.toArray());
-  }
-
-  /**
-   * Fire callback for each element of the Pipeline
-   *
-   * @param callbackfn
-   */
-  forEach<H1 extends URIs = GetURI<this>>(
-    this: Kind<H1, T>,
-    callbackfn: (item: T, i: number, stop: () => void) => unknown,
-  ): Kind<H1, T> {
-    let stopped = false;
-    const stop = () => { stopped = true; };
-    let i = 0;
-    for (const item of this) {
-      i += 1;
-      callbackfn(item, i, stop);
-      if (stopped) break;
-    }
-    return this;
-  }
-
-  /**
-   * Get the first value
-   *
-   * @returns
-   */
-  first<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): Maybe<T> {
-    return (this as Dam<T>).at(0);
-  }
-
-  /**
-   * Find an item in the iterable
-   */
-  find<H1 extends URIs = GetURI<this>>(
-    this: Kind<H1, T>,
-    callbackfn: (value: T, currentIndex: number) => boolean,
-  ): Maybe<T> {
-    let i = 0;
-    for (const item of this) {
-      if (callbackfn(item, i)) return Maybe.some(item);
-      i += 1;
-    }
-    return Maybe.none;
-  }
-
-  /**
-   * Get the current size of the pipeline if run
-   */
-  getSize<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): number {
-    const self = this as Dam<T>;
-    if (Array.isArray(self.root)) return self.root.length;
-    if (self.root instanceof Set) return self.root.size;
-    if (self.root instanceof Map) return self.root.size;
-    let i = 0;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const _ of this) { i += 1; }
-    return i;
-  }
-
-  /**
-   * Get the n'th item in the pipeline if run
-   *
-   * iterates over the entire iterable until the index
-   * this is a heavy operation
-   *
-   * if you need index access, consider using @nkp/collection
-   * or arrays instead
-   *
-   * @param index
-   * @returns
-   */
-  at(index: number): Maybe<T> {
-    // shortcut for arrays
-    if (Array.isArray(this.root)) {
-      if (index >= 0) {
-        if (index >= this.root.length) return Maybe.none;
-        return Maybe.some(this.root[index]);
-      } else {
-        if (-index > this.root.length) return Maybe.none;
-        return Maybe.some(this.root[this.root.length - index]);
-      }
-    }
-
-    let i = 0;
-    if (i >= 0) {
-      // seek to index
-      for (const item of this) {
-        if (i === index) return Maybe.some(item);
-        i += 1;
-      }
-      return Maybe.none;
-    } else {
-      // i is negative
-      // collect as array and reverse index
-      const arr = (this as Kind<DamURI, T>).toArray();
-      if (-index > arr.length) return Maybe.none;
-      return Maybe.some(arr[arr.length - index]!);
-    }
+  rebase<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): Kind<H1, T> {
+    return new (this.constructor as $TODO)((this as Dam<T>).toArray());
   }
 }

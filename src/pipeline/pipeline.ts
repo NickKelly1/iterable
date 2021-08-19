@@ -1,3 +1,4 @@
+import { Maybe } from '@nkp/maybe';
 import { GetURI, Kind, URIs } from '../HKT';
 import { Pipelineable, unpipeline } from '../utils/types';
 import { $TODO } from '../utils/utility-types';
@@ -41,13 +42,13 @@ export abstract class Pipeline<T> implements Iterable<T> {
   ): Kind<H1, U> {
     const self = this;
     // const self = this;
-    const iteratorable = function * (): Iterable<U> {
+    function * iteratorable (): Iterable<U> {
       let i = 0;
       for (const item of self) {
         yield callbackfn(item, i);
         i += 1;
       }
-    };
+    }
     return new (this.constructor as $TODO)(iteratorable) as Kind<H1, U>;
   }
 
@@ -80,16 +81,16 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * @param this
    * @returns
    */
-  flatten<U, H1 extends URIs = GetURI<this>>(
-    this: Kind<H1, Iterable<U>>,
-  ): Kind<H1, U> {
+  flat<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, Iterable<T>>,
+  ): Kind<H1, T> {
     const self = this;
-    const iteratorable = function * (): Iterable<U> {
+    const iteratorable = function * (): Iterable<T> {
       for (const item of self) {
         yield * item;
       }
     };
-    return new (this.constructor as $TODO)(iteratorable) as Kind<H1, U>;
+    return new (this.constructor as $TODO)(iteratorable) as Kind<H1, T>;
   }
 
   /**
@@ -103,13 +104,13 @@ export abstract class Pipeline<T> implements Iterable<T> {
     callbackfn: (value: T, currentIndex: number) => boolean
   ): Kind<H1, T> {
     const self = this;
-    const iteratorable = function * () {
+    function * iteratorable (): Iterable<T> {
       let i = 0;
       for (const item of self) {
         if (callbackfn(item, i)) yield item;
         i += 1;
       }
-    };
+    }
     return new (this.constructor as $TODO)(iteratorable);
   }
 
@@ -149,10 +150,10 @@ export abstract class Pipeline<T> implements Iterable<T> {
     ...pushed: T[]
   ): Kind<H1, T> {
     const self = this;
-    const pushIterator = function * () {
+    function * pushIterator (): Iterable<T> {
       yield * self;
       yield * pushed;
-    };
+    }
     return new (this.constructor as $TODO)(pushIterator);
   }
 
@@ -178,10 +179,10 @@ export abstract class Pipeline<T> implements Iterable<T> {
     ...unshifted: T[]
   ): Kind<H1, T> {
     const self = this;
-    const pushIterator = function * () {
+    function * pushIterator (): Iterable<T> {
       yield * unshifted;
       yield * self;
-    };
+    }
     return new (this.constructor as $TODO)(pushIterator);
   }
 
@@ -217,7 +218,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
 
     const sortFn = typeof sort === 'function' ? sort : smartSort(direction);
 
-    const iteratorable = function * () {
+    const iteratorable = function * (): Iterable<T> {
       const items: T[] = [];
       for (const item of self) {
         items.push(item);
@@ -228,7 +229,6 @@ export abstract class Pipeline<T> implements Iterable<T> {
 
     return new (this.constructor as $TODO)(iteratorable);
   }
-
 
   /**
    * Reverse the pipeline
@@ -241,13 +241,12 @@ export abstract class Pipeline<T> implements Iterable<T> {
     this: Kind<H1, T>,
   ): Kind<H1, T> {
     const self = this as Pipeline<T>;
-    function * iteratorable() {
+    function * iteratorable(): Iterable<T> {
       const arr: T[] = self.toArray().reverse();
       yield * arr;
     }
     return new (this.constructor as $TODO)(iteratorable);
   }
-
 
   /**
    * Slice values from the pipeline
@@ -266,7 +265,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
     const _start = start ?? 0;
     const _end = end;
     const doesEnd = end !== undefined;
-    function * iteratorable() {
+    function * iteratorable(): Iterable<T> {
       let i = 0;
       for (const item of self) {
         if (doesEnd && (i >= (_end as number))) break;
@@ -277,6 +276,72 @@ export abstract class Pipeline<T> implements Iterable<T> {
     return new (this.constructor as $TODO)(iteratorable);
   }
 
+  /**
+   * Zip with another iterable, stopping on first empty result
+   *
+   * @param this
+   * @param right
+   * @returns
+   */
+  zipShort<U, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    right: Iterable<U>,
+  ): Kind<H1, [T, U]> {
+    const self = this as Pipeline<T>;
+    function * iteratorable (): Iterable<[T, U]> {
+      const _left = self[Symbol.iterator]();
+      const _right = right[Symbol.iterator]();
+      while (true) {
+        const _nextLeft = _left.next();
+        const _nextRight = _right.next();
+        if (_nextLeft.done || _nextRight.done) {
+          // done
+          break;
+        }
+        yield [_nextLeft.value, _nextRight.value,];
+      }
+    }
+    return new (this.constructor as $TODO)(iteratorable);
+  }
+
+  /**
+   * Zip with another iterable, stopping on last empty result
+   *
+   * @param this
+   * @param right
+   * @returns
+   */
+  zipLong<U, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    right: Iterable<U>,
+  ): Kind<H1, [Maybe<T>, Maybe<U>]> {
+    const self = this as Pipeline<T>;
+    const iteratorable = function * (): Iterable<[Maybe<T>, Maybe<U>]> {
+      const _left = self[Symbol.iterator]();
+      const _right = right[Symbol.iterator]();
+      while (true) {
+        const _nextLeft = _left.next();
+        const _nextRight = _right.next();
+        if (_nextLeft.done && _nextRight.done) {
+          // done
+          break;
+        }
+        else if (_nextLeft.done) {
+          // only left done
+          yield [Maybe.none, Maybe.some(_nextRight.value),];
+        }
+        else if (_nextRight.done) {
+          // only left done
+          yield [Maybe.some(_nextLeft.value), Maybe.none,];
+        }
+        else {
+          // neither done
+          yield [Maybe.some(_nextLeft.value), Maybe.some(_nextRight.value),];
+        }
+      }
+    };
+    return new (this.constructor as $TODO)(iteratorable);
+  }
 
   /**
    * Reduce the pipeline
@@ -299,7 +364,6 @@ export abstract class Pipeline<T> implements Iterable<T> {
     return current;
   }
 
-
   /**
    * Reduce Right the pipeline
    *
@@ -321,6 +385,28 @@ export abstract class Pipeline<T> implements Iterable<T> {
     return current;
   }
 
+  /**
+   * Join the pipeline into a string
+   *
+   * @param this
+   * @param
+   * @returns
+   */
+  join<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    separator?: string,
+  ): string {
+    let result = '';
+    let first = false;
+    for (const item of this) {
+      if (first && separator) {
+        result += separator + String(item);
+        first = false;
+      }
+      else result += String(item);
+    }
+    return result;
+  }
 
   /**
    * Is every callback true?

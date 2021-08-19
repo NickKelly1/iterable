@@ -35,6 +35,6 @@ export function toBucket<T>(value: Pipelineable<T>): Bucket<T> {
  * @param value
  * @returns
  */
-export function toDam<T>(value: Dam<T>): Dam<T> {
+export function toDam<T>(value: Pipelineable<T>): Dam<T> {
   return new Dam(value);
 }

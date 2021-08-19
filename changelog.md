@@ -2,6 +2,17 @@
 
 ## 0.0.5 - 2021-xx-xx
 
+### Added
+
+- Intermediate `Repeatable` class
+- `Repeatable.prototype.zipShort`
+- `Repeatable.prototype.zipLong`
+
+### Changed
+
+- `Dam` extends `Repeatable`
+- `River` extends `Repeatable`
+
 ## 0.0.4 - 2021-08-19
 
 ### Added
