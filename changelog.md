@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.6 - 2021-xx-xx
+
+### Added
+
+- `Pipeline.prototype.excludeUndefined`
+- `Pipeline.prototype.excludeNull`
+- `Pipeline.prototype.excludeNullable`
+- `Pipeline.prototype.extractSome`
+
 ## 0.0.5 - 2021-08-19
 
 ### Added

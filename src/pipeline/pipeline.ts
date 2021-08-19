@@ -128,6 +128,44 @@ export abstract class Pipeline<T> implements Iterable<T> {
   }
 
   /**
+   * Exclude undefined values from the pipeline
+   *
+   * @param this
+   * @returns
+   */
+  excludeUndefined<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+  ): Kind<H1, T extends undefined ? never : T> {
+    return this.exclude(undefined as unknown as T) as Kind<H1, T extends undefined ? never : T>;
+  }
+
+  /**
+   * Exclude null values from the pipeline
+   *
+   * @param this
+   * @returns
+   */
+  excludeNull<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+  ): Kind<H1, T extends null ? never : T> {
+    return this.exclude(null as unknown as T) as Kind<H1, T extends null ? never : T>;
+  }
+
+  /**
+   * Exclude nullable values from the pipeline
+   *
+   * @param this
+   * @returns
+   */
+  excludeNullable<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+  ): Kind<H1, NonNullable<T>> {
+    return this.filter(item =>
+      item !== (null as unknown as T)
+      && item !== (undefined as unknown as T)) as Kind<H1, NonNullable<T>>;
+  }
+
+  /**
    * Filter in the specific value
    *
    * @param value
@@ -138,6 +176,17 @@ export abstract class Pipeline<T> implements Iterable<T> {
   ): Kind<H1, T> {
     const _values = new Set(values);
     return this.filter((item) => _values.has(item));
+  }
+
+  /**
+   * Pick only the Some values
+   */
+  extractSome<U, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, Maybe<U>>,
+  ): Kind<H1, U> {
+    return this
+      .filter(item => item.isSome())
+      .map(item => item.value!);
   }
 
   /**
