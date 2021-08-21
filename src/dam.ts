@@ -1,14 +1,14 @@
-import { GetURI, HKT, Kind, URIs } from '../HKT';
-import { Repeatable } from '../repeatable/repeatable';
-import { Pipelineable } from '../utils/types';
-import { $TODO } from '../utils/utility-types';
+import { GetURI, HKT, Kind, URIs } from './HKT';
+import { Repeatable } from './repeatable';
+import { Pipelineable } from './types';
+import { $TODO } from './utility-types';
 
 // declare URI
 export const DamURI = 'Dam';
 export type DamURI = typeof DamURI;
 
 // register for usage as higher kind type
-declare module '../HKT' {
+declare module './HKT' {
   interface URIToKind<A> {
     readonly [DamURI]: Dam<A>;
   }

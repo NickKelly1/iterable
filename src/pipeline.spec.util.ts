@@ -1,5 +1,5 @@
 import { Maybe } from '@nkp/maybe';
-import { Pipelineable } from '../utils/types';
+import { Pipelineable } from './types';
 import { Pipeline } from './pipeline';
 
 export function testPipelineFunctions(create: (<T>(pipelineable: Pipelineable<T>) => Pipeline<T>)): void {

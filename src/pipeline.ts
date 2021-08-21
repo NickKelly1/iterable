@@ -1,14 +1,14 @@
 import { Maybe, Some } from '@nkp/maybe';
-import { GetURI, Kind, URIs } from '../HKT';
-import { Pipelineable, unpipeline } from '../utils/types';
-import { $TODO } from '../utils/utility-types';
+import { GetURI, Kind, URIs } from './HKT';
+import { Pipelineable, unpipeline } from './types';
+import { $TODO } from './utility-types';
 
 // declare URI
 export const PipelineURI = 'Pipeline';
 export type PipelineURI = typeof PipelineURI;
 
 // register for usage as higher kind type
-declare module '../HKT' {
+declare module './HKT' {
   interface URIToKind<A> {
     readonly [PipelineURI]: Pipeline<A>;
   }

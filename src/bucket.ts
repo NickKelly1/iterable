@@ -1,16 +1,16 @@
 import { Maybe } from '@nkp/maybe';
-import { HKT, Kind, URIs } from '../HKT';
-import { Pipeline } from '../pipeline/pipeline';
-import { Dam } from '../dam/dam';
-import { Pipelineable, unpipeline } from '../utils/types';
-import { River } from '../river/river';
+import { HKT, Kind, URIs } from './HKT';
+import { Pipeline } from './pipeline';
+import { Dam } from './dam';
+import { Pipelineable, unpipeline } from './types';
+import { River } from './river';
 
 // declare URI
 export const BucketURI = 'Bucket';
 export type BucketURI = typeof BucketURI;
 
 // register for usage as higher kind type
-declare module '../HKT' {
+declare module './HKT' {
   interface URIToKind<A> {
     readonly [BucketURI]: Bucket<A>;
   }

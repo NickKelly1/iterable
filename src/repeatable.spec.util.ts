@@ -1,4 +1,4 @@
-import { Pipelineable } from '../utils/types';
+import { Pipelineable } from './types';
 import { Repeatable } from './repeatable';
 
 

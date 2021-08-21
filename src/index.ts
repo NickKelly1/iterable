@@ -1,13 +1,13 @@
-import { River } from './river/river';
-import { Bucket } from './bucket/bucket';
-import { Dam } from './dam/dam';
-import { Pipelineable } from './utils/types';
+import { River } from './river';
+import { Bucket } from './bucket';
+import { Dam } from './dam';
+import { Pipelineable } from './types';
 
-export * from './pipeline/pipeline';
-export * from './utils/types';
-export * from './river/river';
-export * from './dam/dam';
-export * from './bucket/bucket';
+export * from './pipeline';
+export * from './types';
+export * from './river';
+export * from './dam';
+export * from './bucket';
 
 /**
  * Create a river

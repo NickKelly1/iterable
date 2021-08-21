@@ -1,13 +1,13 @@
-import { HKT } from '../HKT';
-import { Repeatable } from '../repeatable/repeatable';
-import { Pipelineable, unpipeline } from '../utils/types';
+import { HKT } from './HKT';
+import { Repeatable } from './repeatable';
+import { Pipelineable, unpipeline } from './types';
 
 // declare URI
 export const RiverURI = 'River';
 export type RiverURI = typeof RiverURI;
 
 // register for usage as higher kind type
-declare module '../HKT' {
+declare module './HKT' {
   interface URIToKind<A> {
     readonly [RiverURI]: River<A>;
   }

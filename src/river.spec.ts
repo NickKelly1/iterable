@@ -1,4 +1,4 @@
-import { testPipelineFunctions } from '../pipeline/pipeline.spec.util';
+import { testPipelineFunctions } from './pipeline.spec.util';
 import { River } from './river';
 
 describe('River', () => {

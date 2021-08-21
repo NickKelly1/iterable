@@ -1,14 +1,14 @@
 import { Maybe } from '@nkp/maybe';
-import { GetURI, Kind, URIs } from '../HKT';
-import { Pipeline } from '../pipeline/pipeline';
-import { Pipelineable, unpipeline } from '../utils/types';
+import { GetURI, Kind, URIs } from './HKT';
+import { Pipeline } from './pipeline';
+import { Pipelineable, unpipeline } from './types';
 
 // declare URI
 export const RepeatableURI = 'Repeatable';
 export type RepeatableURI = typeof RepeatableURI;
 
 // register for usage as higher kind type
-declare module '../HKT' {
+declare module './HKT' {
   interface URIToKind<A> {
     readonly [RepeatableURI]: Repeatable<A>;
   }
