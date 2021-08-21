@@ -10,6 +10,7 @@
 - `Pipeline.prototype.pickFirst`
 - `Pipeline.prototype.unique`
 - Comprehensive tests for every `Pipeline.prototype` function
+- Test coverage
 
 ## Changed
 
