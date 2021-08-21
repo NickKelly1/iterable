@@ -128,6 +128,20 @@ export abstract class Pipeline<T> implements Iterable<T> {
   }
 
   /**
+   * Exclude items that test positive
+   *
+   * @param this
+   * @param test
+   * @returns
+   */
+  excludeTest<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    test: RegExp,
+  ): Kind<H1, T> {
+    return this.filter(item => !test.test(String(item)));
+  }
+
+  /**
    * Exclude undefined values from the pipeline
    *
    * @param this
@@ -176,6 +190,20 @@ export abstract class Pipeline<T> implements Iterable<T> {
   ): Kind<H1, T> {
     const _values = new Set(values);
     return this.filter((item) => _values.has(item));
+  }
+
+  /**
+   * Pick items that test positive
+   *
+   * @param this
+   * @param test
+   * @returns
+   */
+  pickTest<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    test: RegExp,
+  ): Kind<H1, T> {
+    return this.filter(item => test.test(String(item)));
   }
 
   /**

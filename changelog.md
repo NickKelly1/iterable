@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.7 - 2021-xx-xx
+
+### Added
+
+- `Pipeline.prototype.excludeTest`
+- `Pipeline.prototype.pickTest`
+
 ## 0.0.6 - 2021-08-19
 
 ### Added
