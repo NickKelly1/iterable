@@ -42,37 +42,6 @@ export abstract class Repeatable<T> extends Pipeline<T> {
     yield * this.getIterable();
   }
 
-
-  /**
-   * Fire callback for each element of the Pipeline
-   *
-   * @param callbackfn
-   */
-  forEach<H1 extends URIs = GetURI<this>>(
-    this: Kind<H1, T>,
-    callbackfn: (item: T, i: number, stop: () => void) => unknown,
-  ): Kind<H1, T> {
-    const iterable = (this as Repeatable<T>).getIterable();
-    let stopped = false;
-    const stop = () => { stopped = true; };
-    let i = 0;
-    for (const item of iterable) {
-      i += 1;
-      callbackfn(item, i, stop);
-      if (stopped) break;
-    }
-    return this;
-  }
-
-  /**
-   * Get the first value
-   *
-   * @returns
-   */
-  first<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): Maybe<T> {
-    return (this as Repeatable<T>).at(0);
-  }
-
   /**
    * Find an item in the iterable
    */

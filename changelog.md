@@ -1,11 +1,20 @@
 # Changelog
 
-## 0.0.7 - 2021-xx-xx
+## 0.0.7 - 2021-08-21
 
 ### Added
 
-- `Pipeline.prototype.excludeTest`
-- `Pipeline.prototype.pickTest`
+- `Pipeline.prototype.excludeMatching`
+- `Pipeline.prototype.pickMatching`
+- `Pipeline.prototype.excludeFirst`
+- `Pipeline.prototype.pickFirst`
+- `Pipeline.prototype.unique`
+- Comprehensive tests for every `Pipeline.prototype` function
+
+## Changed
+
+- `Pipeline.prototype.pickSome` to `pipeline.prototype.flatSome`
+- Fix a bug in `Pipeline.prototype.join`
 
 ## 0.0.6 - 2021-08-19
 

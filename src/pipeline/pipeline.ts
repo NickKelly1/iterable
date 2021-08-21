@@ -1,4 +1,4 @@
-import { Maybe } from '@nkp/maybe';
+import { Maybe, Some } from '@nkp/maybe';
 import { GetURI, Kind, URIs } from '../HKT';
 import { Pipelineable, unpipeline } from '../utils/types';
 import { $TODO } from '../utils/utility-types';
@@ -27,6 +27,34 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * Iterate over the instance
    */
   abstract [Symbol.iterator](): IterableIterator<T>;
+
+  /**
+   * Fire callback for each element of the Pipeline
+   *
+   * @param callbackfn
+   */
+  forEach<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    callbackfn: (item: T, i: number) => unknown,
+  ): Kind<H1, T> {
+    let i = 0;
+    for (const item of this) {
+      i += 1;
+      callbackfn(item, i);
+    }
+    return this;
+  }
+
+  /**
+   * Get the first value
+   *
+   * @returns
+   */
+  first<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): Maybe<T> {
+    const first = this[Symbol.iterator]().next();
+    if (first.done) return Maybe.none;
+    return Maybe.some(first.value);
+  }
 
   /**
    * Map the pipeline
@@ -81,16 +109,34 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * @param this
    * @returns
    */
-  flat<H1 extends URIs = GetURI<this>>(
-    this: Kind<H1, Iterable<T>>,
-  ): Kind<H1, T> {
+  flat<U = T extends Iterable<infer E> ? E : never, H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, Iterable<U>>,
+  ): Kind<H1, U> {
     const self = this;
-    const iteratorable = function * (): Iterable<T> {
+    const iteratorable = function * (): Iterable<U> {
       for (const item of self) {
         yield * item;
       }
     };
-    return new (this.constructor as $TODO)(iteratorable) as Kind<H1, T>;
+    return new (this.constructor as $TODO)(iteratorable) as Kind<H1, U>;
+  }
+
+  /**
+   * Pick only the Some values
+   */
+  flatSome<
+    U = T extends Maybe<infer E>
+      ? E
+      : T extends Some<infer D>
+        ? D
+        : never,
+    H1 extends URIs = GetURI<this>
+  >(
+    this: Kind<H1, Maybe<U> | Some<U>>,
+  ): Kind<H1, U> {
+    return this
+      .filter(item => item.isSome())
+      .map(item => item.value!);
   }
 
   /**
@@ -128,13 +174,36 @@ export abstract class Pipeline<T> implements Iterable<T> {
   }
 
   /**
+   * Exclude the first "count" items of the pipeline
+   *
+   * @param this
+   * @param count
+   * @returns
+   */
+  excludeFirst<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    count?: number,
+  ): Kind<H1, T> {
+    const _count = count ?? 1;
+    const self = this;
+    function * iteratorable (): Iterable<T> {
+      let i = 0;
+      for (const item of self) {
+        if (!(i < _count)) yield item;
+        i += 1;
+      }
+    }
+    return new (this.constructor as $TODO)(iteratorable);
+  }
+
+  /**
    * Exclude items that test positive
    *
    * @param this
    * @param test
    * @returns
    */
-  excludeTest<H1 extends URIs = GetURI<this>>(
+  excludeMatching<H1 extends URIs = GetURI<this>>(
     this: Kind<H1, T>,
     test: RegExp,
   ): Kind<H1, T> {
@@ -199,7 +268,7 @@ export abstract class Pipeline<T> implements Iterable<T> {
    * @param test
    * @returns
    */
-  pickTest<H1 extends URIs = GetURI<this>>(
+  pickMatching<H1 extends URIs = GetURI<this>>(
     this: Kind<H1, T>,
     test: RegExp,
   ): Kind<H1, T> {
@@ -207,14 +276,26 @@ export abstract class Pipeline<T> implements Iterable<T> {
   }
 
   /**
-   * Pick only the Some values
+   * Pick the first "count" items of the pipeline
+   *
+   * @param this
+   * @param count
+   * @returns
    */
-  extractSome<U, H1 extends URIs = GetURI<this>>(
-    this: Kind<H1, Maybe<U>>,
-  ): Kind<H1, U> {
-    return this
-      .filter(item => item.isSome())
-      .map(item => item.value!);
+  pickFirst<H1 extends URIs = GetURI<this>>(
+    this: Kind<H1, T>,
+    count?: number,
+  ): Kind<H1, T> {
+    const _count = count ?? 1;
+    const self = this;
+    function * iteratorable (): Iterable<T> {
+      let i = 0;
+      for (const item of self) {
+        if (!(i >= _count)) yield item;
+        i += 1;
+      }
+    }
+    return new (this.constructor as $TODO)(iteratorable);
   }
 
   /**
@@ -227,11 +308,11 @@ export abstract class Pipeline<T> implements Iterable<T> {
     ...pushed: T[]
   ): Kind<H1, T> {
     const self = this;
-    function * pushIterator (): Iterable<T> {
+    function * iteratorable (): Iterable<T> {
       yield * self;
       yield * pushed;
     }
-    return new (this.constructor as $TODO)(pushIterator);
+    return new (this.constructor as $TODO)(iteratorable);
   }
 
   /**
@@ -256,11 +337,11 @@ export abstract class Pipeline<T> implements Iterable<T> {
     ...unshifted: T[]
   ): Kind<H1, T> {
     const self = this;
-    function * pushIterator (): Iterable<T> {
+    function * iteratorable (): Iterable<T> {
       yield * unshifted;
       yield * self;
     }
-    return new (this.constructor as $TODO)(pushIterator);
+    return new (this.constructor as $TODO)(iteratorable);
   }
 
   /**
@@ -474,13 +555,14 @@ export abstract class Pipeline<T> implements Iterable<T> {
     separator?: string,
   ): string {
     let result = '';
-    let first = false;
+    let first = true;
     for (const item of this) {
-      if (first && separator) {
+      if (!first && separator) {
         result += separator + String(item);
+      } else {
         first = false;
+        result += String(item);
       }
-      else result += String(item);
     }
     return result;
   }
@@ -521,6 +603,16 @@ export abstract class Pipeline<T> implements Iterable<T> {
       i += 1;
     }
     return false;
+  }
+
+  /**
+   * Remove non-unique items from the pipeline
+   *
+   * @param this
+   * @returns
+   */
+  unique<H1 extends URIs = GetURI<this>>(this: Kind<H1, T>): Kind<H1, T> {
+    return new (this.constructor as $TODO)(this.toSet());
   }
 
   /**
