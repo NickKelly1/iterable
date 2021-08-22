@@ -433,9 +433,11 @@ import { River, toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
-river.map(toRiver) // River [River [1], River [2], River [3]]
+river.map(toRiver); // River [River [1], River [2], River [3]]
 
-river.flatMap(toRiver) // River [1, 2, 3]
+river.flatMap(toRiver); // River [1, 2, 3]
+
+river.map(toRiver).flat() // River [1, 2, 3]
 ```
 
 Available in:
@@ -610,7 +612,7 @@ import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
-// sum the pipeline
+// sum the pipeline from left-to-right
 river.reduce((next, acc) => acc + next, 0); // 6
 ```
 
@@ -632,7 +634,7 @@ import { toRiver } from '@nkp/iterable';
 const river = toRiver([1, 2, 3]);
 
 // stringify and concatenate the pipeline items from right-to-left
-river.reduce((next, acc) => acc + String(next), ''); // '321'
+river.reduceRight((next, acc) => acc + String(next), ''); // '321'
 ```
 
 Available in:
