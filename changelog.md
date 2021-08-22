@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.12 - 2021-08-21
+
+### Changed
+
+- Updated changelog.md
+
 ## 0.0.11 - 2021-08-21
 
 ### Changed

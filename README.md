@@ -77,17 +77,17 @@ yarn add @nkp/iterable
 
 ## Collection types
 
-type | river | dam | bucket |
+**type** | `River` | `Dam` | `Bucket` |
 --- | --- | --- | --- |
 **similar to** | array | generator | generator |
-**cpu** | light | heavy | light |
 **memory** | heavy | light | light |
+**cpu** | light | heavy | light |
 **exhausts** | no | no | yes |
 
 ### River
 
+- **memory**: heavy
 - **cpu**: light
-- **memory**: light
 - **exhausts**: no
 
 `River` is the most familiar iterable type.
@@ -99,30 +99,30 @@ Like an array, `River's` items exist in memory at all times.
 `River's` flow methods, `map`, `filter`, `pick`, `exclude`, cause instantaneous trasnformation of it's internal items, as opposed to `Dam` which only runs transformations when items are requested.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+import { toRiver } from '@nkp/iterable';
 
-const river: River = toRiver([1, 2, 3, 4]);
+const river = toRiver([1, 2, 3, 4]);
 let called = false;
 
-river
+river               // River [1, 2, 3, 4]
   .map(n => {
     called = true;
     n + 1;
-  })
-  .exclude(2)
-  .pick(3, 4)
-  .sort(-1);
+  })                // River [2, 3, 4, 5]
+  .exclude(2)       // River [3, 4, 5]
+  .pick(3, 4)       // River [3, 4]
+  .sort(-1);        // River [4, 3]
 
 // transformations have executed upon call
-called; // true
+called;             // true
 
-river.toArray(); // [4, 3]
+river.toArray();    // Array [4, 3]
 ```
 
 ### Dam
 
-- **cpu**: heavy
 - **memory**: light
+- **cpu**: heavy
 - **exhausts**: no
 
 `Dam` is a lazy stream.
@@ -132,24 +132,24 @@ river.toArray(); // [4, 3]
 `Dam` stores transformations and doesn't execute them until the caller requests data from it.
 
 ```ts
-import { Dam, toDam } from '@nkp/iterable';
+import { toDam } from '@nkp/iterable';
 
-const dam: Dam = toDam([1, 2, 3, 4]);
+const dam = toDam([1, 2, 3, 4]);
 let called = false;
 
-dam
+dam                 // Dam [1, 2, 3, 4]
   .map(n => {
     called = true;
     n + 1;
-  })
-  .exclude(2)
-  .pick(3, 4)
-  .sort(-1);
+  })                // Dam [2, 3, 4, 5]
+  .exclude(2)       // Dam [3, 4, 5]
+  .pick(3, 4)       // Dam [3, 4]
+  .sort(-1);        // Dam [4, 3]
 
 // transformations have not executed yet
-called; // false
+called;             // false
 
-dam.toArray(); // [4, 3]
+dam.toArray();      // Array [4, 3]
 
 // now that data has been requeted, all transformations have run
 called; // true
@@ -158,10 +158,14 @@ called; // true
 `Dam` is considered heavy on CPU because every time data is requested, every transformation must run again.
 
 ```ts
-const dam = new Dam([1, 2, 3]).map(n => n + 1).exclude(4).sort();
-dam.toArray(); // all transformations run on [1, 2, 3]
-dam.toArray(); // all transformations run on [1, 2, 3] (again)
-dam.item(1); // all transformations run on [1, 2, 3] (again)
+const dam = new Dam([1, 2, 3])
+  .map(n => n + 1)
+  .exclude(4)
+  .sort();        // Dam [2, 3]
+
+dam.toArray();    // all transformations run on [1, 2, 3]
+dam.toArray();    // all transformations run on [1, 2, 3] (again)
+dam.item(1);      // all transformations run on [1, 2, 3] (again)
 // heavy on CPU for frequent data request
 ```
 
@@ -191,25 +195,25 @@ import { Bucket, toBucket } from '@nkp/iterable';
 const bucket: Bucket = toBucket(new Set([1, 2, 3, 4]).values());
 let called = false;
 
-bucket
+bucket            // Bucket [1, 2, 3, 4]
   .map(n => {
     called = true;
     n + 1;
-  })
-  .exclude(2)
-  .pick(3, 4)
-  .sort(-1);
+  })              // Bucket [2, 3, 4, 5]
+  .exclude(2)     // Bucket [3, 4, 5]
+  .pick(3, 4)     // Bucket [3, 4]
+  .sort(-1);      // Bucket [4, 3]
 
 // transformations have not executed yet
-called; // false
+called;           // false
 
-bucket.toArray(); // [4, 3]
+bucket.toArray(); // Array [4, 3]
 
 // now that data has been requeted, all transformations have run
-called; // true
+called;           // true
 
 // the buckets inner iterable has been exhaused so the bucket is done
-bucket.toArray(); // []
+bucket.toArray(); // Array []
 ```
 
 `Bucket` does not expose additional helpers methods, like `Dam`, to access individual items because such methods would cause irreversible mutation and on the inner iterable and may return different values on every call. Instead, `Bucket` exposts itself as an iterable with a `next()` method.
@@ -313,9 +317,9 @@ Available in:
 Removes all null values from the pipeline.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+import { toRiver } from '@nkp/iterable';
 
-const river: River<number> = toRiver([1, null, 3]);
+const river = toRiver([1, null, 3]);
 
 river.excludeNull(); // River [1, 3]
 ```
