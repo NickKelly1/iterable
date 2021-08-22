@@ -201,15 +201,15 @@ bucket
   .sort(-1);
 
 // transformations have not executed yet
-console.log(called); // false
+called; // false
 
 bucket.toArray(); // [4, 3]
 
 // now that data has been requeted, all transformations have run
-console.log(console.log(called)); // true
+called; // true
 
 // the buckets inner iterable has been exhaused so the bucket is done
-console.log(bucket.toArray()); // []
+bucket.toArray(); // []
 ```
 
 `Bucket` does not expose additional helpers methods, like `Dam`, to access individual items because such methods would cause irreversible mutation and on the inner iterable and may return different values on every call. Instead, `Bucket` exposts itself as an iterable with a `next()` method.
@@ -247,7 +247,7 @@ import { toRiver } from '@nkp/iterable';
 
 toRiver([1, 2]).every(Boolean); // true
 toRiver([0, 1]).every(Boolean); // false - 0 is falsy
-toRiver([0, 1]).every((n) => n >= 0); // true
+toRiver([0, 1]).every(n => n >= 0); // true
 ```
 
 Available in:
@@ -263,7 +263,7 @@ Filters items out of the pipeline if they match any of the given values.
 ```ts
 import { toRiver } from '@nkp/iterable';
 
-console.log(toRiver([1, 2, 3]).exclude(1, 2)); // River [3]
+toRiver([1, 2, 3]).exclude(1, 2); // River [3]
 ```
 
 Available in:
@@ -279,7 +279,7 @@ Removes the first `n` items from the pipeline.
 ```ts
 import { toRiver } from '@nkp/iterable';
 
-console.log(toRiver([1, 2, 3]).excludeFirst(2)); // River [3]
+toRiver([1, 2, 3]).excludeFirst(2); // River [3]
 ```
 
 Available in:
@@ -295,15 +295,11 @@ Removes items matching the given regex from the pipeline.
 ```ts
 import { toRiver } from '@nkp/iterable';
 
-const river = toRiver([
-  'index.html',
-  'style.css',
-  'script.js',
-]);
+const river = toRiver(['index.html', 'style.css', 'script.js']);
 
 const remaining = river.excludeMatching(/\.css$/);
 
-console.log(remaining); // River ['index.html', 'script.js']
+remaining; // River ['index.html', 'script.js']
 ```
 
 Available in:
@@ -319,12 +315,9 @@ Removes all null values from the pipeline.
 ```ts
 import { River, toRiver } from '@nkp/iterable';
 
-const river: River<number> = toRiver([
-  1,
-  null,
-  3,
-]);
-console.log(river.excludeNull()); // River [1, 3]
+const river: River<number> = toRiver([1, null, 3]);
+
+river.excludeNull(); // River [1, 3]
 ```
 
 Available in:
@@ -340,14 +333,9 @@ Removes all null and undefined values from the pipeline.
 ```ts
 import { River, toRiver } from '@nkp/iterable';
 
-const river: River<number> = toRiver([
-  1,
-  null,
-  undefined,
-  3,
-]);
+const river: River<number> = toRiver([1, null, undefined, 3]);
 
-console.log(river.excludeNullable()); // River [1, 3]
+river.excludeNullable(); // River [1, 3]
 ```
 
 Available in:
@@ -363,13 +351,9 @@ Removes all undefined values from the pipeline.
 ```ts
 import { River, toRiver } from '@nkp/iterable';
 
-const river: River<number> = toRiver([
-  1,
-  undefined,
-  3,
-]);
+const river: River<number> = toRiver([1, undefined, 3]);
 
-console.log(river.excludeUndefined()); // River [1, 3]
+river.excludeUndefined(); // River [1, 3]
 ```
 
 Available in:
@@ -389,7 +373,7 @@ import { toRiver } from '@nkp/iterable';
 
 const pipeline = toRiver([1, 2, 3]);
 
-console.log(pipeline.filter(n => n > 1)); // [2, 3]
+pipeline.filter(n => n > 1); // [2, 3]
 ```
 
 Available in:
@@ -409,7 +393,7 @@ import { toRiver } from '@nkp/iterable';
 
 const pipeline = toRiver([1, 2, 3]);
 
-console.log(pipeline.first()); // Some<1>
+pipeline.first(); // Some<1>
 ```
 
 Available in:
@@ -429,7 +413,7 @@ import { toRiver } from '@nkp/iterable';
 
 const pipeline = toRiver([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
 
-console.log(pipeline.flat()); // River [1, 2, 3, 4, 5, 6, 7, 8, 9]
+pipeline.flat(); // River [1, 2, 3, 4, 5, 6, 7, 8, 9]
 ```
 
 Available in:
@@ -470,13 +454,9 @@ The pipeline must be of type `Maybe`.
 import { Maybe } from '@nkp/maybe';
 import { toRiver } from '@nkp/iterable';
 
-const river = toRiver([
-  Maybe.some(1),
-  Maybe.none,
-  Maybe.some(3),
-]);
+const river = toRiver([Maybe.some(1), Maybe.none, Maybe.some(3)]);
 
-console.log(river.flatSome(toRiver)) //  River [1, 3]
+river.flatSome(toRiver) // River [1, 3]
 ```
 
 Available in:
@@ -495,6 +475,7 @@ Similar to `Array.prototype.forEach`.
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
+
 river.forEach(n => console.log(n)); // 1, 2, 3
 ```
 
@@ -513,9 +494,9 @@ Similar to `Array.prototype.join`.
 ```ts
 import { toRiver } from '@nkp/iterable';
 
-const river = toRiver([ 'hello', 'world' ]);
+const river = toRiver(['hello', 'world']);
 
-console.log(river.join(' ')) //  'hello world'
+river.join(' ') //  'hello world'
 ```
 
 Available in:
@@ -535,7 +516,7 @@ import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
-console.log(river.map(n => n + 1)) // River [1, 2, 3]
+river.map(n => n + 1) // River [1, 2, 3]
 ```
 
 Available in:
@@ -553,7 +534,7 @@ import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
-river.pick(1, 2); // River [3]
+river.pick(1, 2); // River [1, 2]
 ```
 
 Available in:
@@ -587,11 +568,7 @@ Keeps only items matching the given regex from the pipeline.
 ```ts
 import { toRiver } from '@nkp/iterable';
 
-const river = toRiver([
-  'index.html',
-  'style.css',
-  'script.js',
-]);
+const river = toRiver(['index.html', 'style.css', 'script.js']);
 
 river.excludeMatching(/\.css$/); // River ['style.css']
 ```
@@ -676,6 +653,7 @@ import { toRiver } from '@nkp/iterable';
 const river = toRiver([1, 2, 3]);
 
 river.reverse(); // River [3, 2, 1]
+
 river; // River [1, 2, 3]
 ```
 
@@ -760,7 +738,7 @@ import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
-river.toArray(); // [1, 2, 3]
+river.toArray(); // Array [1, 2, 3]
 ```
 
 Available in:
@@ -792,9 +770,11 @@ Available in:
 Filter the pipeline to only include unique values.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+import { toRiver } from '@nkp/iterable';
+
 const river = toRiver([1, 2, 2]);
-console.log(river.unique()); // River<[1, 2]>
+
+river.unique(); // River<[1, 2]>
 ```
 
 Available in:
@@ -811,8 +791,10 @@ Similar to `Array.prototype.shift`.
 
 ```ts
 import { River, toRiver } from '@nkp/iterable';
+
 const river = toRiver([1, 2, 3]);
-console.log(river.shift(-1, -2, -3)); // River<[-1, -2, -3, 1, 2, 3]>
+
+river.shift(-1, -2, -3); // River<[-1, -2, -3, 1, 2, 3]>
 ```
 
 Available in:
@@ -827,10 +809,11 @@ Join two pipelines by index.
 The resulting pipeline ends when the final living input pipeline ends.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+import { toRiver } from '@nkp/iterable';
+
 const river = toRiver([1, 2, 3]);
-console.log(river
-  .zipLong([-1, -2, -3, -4]));
+
+river.zipLong([-1, -2, -3, -4]);
 // River<[
 //  [Some<1>, Some<-1>,],
 //  [Some<2>, Some<-2>,],
@@ -851,10 +834,11 @@ Join two pipelines by index.
 The resulting pipeline ends when the first input pipeline ends.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+import { toRiver } from '@nkp/iterable';
+
 const river = toRiver([1, 2, 3]);
-console.log(river
-  .zipLong([-1, -2, -3, -4]));
+
+river.zipLong([-1, -2, -3, -4]);
 // River<[
 //  [1, -1,],
 //  [2, -2,],
