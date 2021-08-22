@@ -1,20 +1,26 @@
 # Changelog
 
+## 0.0.11 - 2021-xx-xx
+
+### Changed
+
+- Updated changelog.md
+
 ## 0.0.10 - 2021-08-21
 
-## Changed
+### Changed
 
 - Updated readme.md
 
 ## 0.0.9 - 2021-08-21
 
-## Changed
+### Changed
 
 - Updated readme.md
 
 ## 0.0.8 - 2021-08-21
 
-## Changed
+### Changed
 
 - Updated readme.md
 
