@@ -27,11 +27,11 @@ Exposes three utility classes, `River`, `Dam` and `Bucket`.
     - [concat](#concat)
     - [every](#every)
     - [exclude](#exclude)
-    - [excludeFirst](#excludeFirst)
-    - [excludeMatching](#excludeMatching)
-    - [excludeNull](#excludeNull)
-    - [excludeNullable](#excludeNullable)
-    - [excludeUndefined](#excludeUndefined)
+    - [excludeFirst](#excludefirst)
+    - [excludeMatching](#excludematching)
+    - [excludeNull](#excludenull)
+    - [excludeNullable](#excludenullable)
+    - [excludeUndefined](#excludeundefined)
     - [filter](#filter)
     - [first](#first)
     - [flat](#flat)
@@ -40,21 +40,21 @@ Exposes three utility classes, `River`, `Dam` and `Bucket`.
     - [forEach](#forEach)
     - [join](#join)
     - [pick](#pick)
-    - [pickFirst](#pickFirst)
-    - [pickMatching](#pickMatching)
+    - [pickFirst](#pickfirst)
+    - [pickMatching](#pickmatching)
     - [push](#push)
     - [reduce](#reduce)
-    - [reduceRight](#reduceRight)
+    - [reduceRight](#reduceright)
     - [reverse](#reverse)
     - [slice](#slice)
     - [some](#some)
     - [sort](#sort)
-    - [toArray](#toArray)
-    - [toSet](#toSet)
+    - [toArray](#toarray)
+    - [toSet](#toset)
     - [unique](#unique)
     - [unshift](#unshift)
-    - [zipLong](#zipLong)
-    - [zipShort](#zipShort)
+    - [zipLong](#ziplong)
+    - [zipShort](#zipshort)
 - [Publishing a new version](#publishing-a-new-version)
 
 ## Installation
@@ -229,6 +229,16 @@ Concatenate an iterable onto the end of the pipeline.
 Unlike `Array.protototype.concat`, `concat` only accepts a single array argument and does not accept spread arguments for consistent behavior. For spread arguments use [push](#push);
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  concat(iterable: Iterable<T>): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 toRiver([1, 2]).concat([3, 4]); // River [1, 2, 3, 4]
@@ -247,6 +257,16 @@ Returns `true` if the callback returns truthy for every value in the pipeline.
 Sibling of [some](#some).
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  every(callbackfn: ((item: T) => boolean)): boolean;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 toRiver([1, 2]).every(Boolean); // true
@@ -265,6 +285,16 @@ Available in:
 Filters items out of the pipeline if they match any of the given values.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  exclude(...values: T[]): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 toRiver([1, 2, 3]).exclude(1, 2); // River [3]
@@ -281,6 +311,16 @@ Available in:
 Removes the first `n` items from the pipeline.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  excludeFirst(count?: number): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 toRiver([1, 2, 3]).excludeFirst(2); // River [3]
@@ -297,6 +337,16 @@ Available in:
 Removes items matching the given regex from the pipeline.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  excludeMatching(regex: RegExp): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver(['index.html', 'style.css', 'script.js']);
@@ -317,6 +367,16 @@ Available in:
 Removes all null values from the pipeline.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  excludeNull(): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, null, 3]);
@@ -335,7 +395,17 @@ Available in:
 Removes all null and undefined values from the pipeline.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+// signature
+
+interface Pipeline<T> {
+  excludeNullable(): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
+import { toRiver } from '@nkp/iterable';
 
 const river: River<number> = toRiver([1, null, undefined, 3]);
 
@@ -353,9 +423,19 @@ Available in:
 Removes all undefined values from the pipeline.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+// signature
 
-const river: River<number> = toRiver([1, undefined, 3]);
+interface Pipeline<T> {
+  excludeUndefined(): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
+import { toRiver } from '@nkp/iterable';
+
+const river = toRiver([1, undefined, 3]);
 
 river.excludeUndefined(); // River [1, 3]
 ```
@@ -373,6 +453,16 @@ Removes items from a pipeline if their callback returns falsy.
 Similar to `Array.prototype.filter`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  filter(callbackfn: ((item: T) => boolean)): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const pipeline = toRiver([1, 2, 3]);
@@ -393,6 +483,16 @@ Get the first item from the pipeline.
 Returns a `Maybe` (either `Some` or `None`) as the first item may not exist.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  first(): Maybe<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const pipeline = toRiver([1, 2, 3]);
@@ -413,6 +513,18 @@ Flattens a nested pipeline, where the nested values may by any iterable
 Similar to `Array.prototype.flat`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  flat(): T extends Iterable<infer U>
+    ? Pipeline<U>
+    : never;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const pipeline = toRiver([[1, 2, 3], [4, 5, 6], [7, 8, 9]]);
@@ -433,7 +545,17 @@ Map pipeline items to iterables and flatten back into the original pipeline kind
 Similar to `Array.prototype.flatMap`.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+// signature
+
+interface Pipeline<T> {
+  flatMap<U>(callbackfn: ((item: T) => Iterable<U>)): Pipeline<U>;
+}
+```
+
+```ts
+// usage
+
+import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
@@ -441,7 +563,7 @@ river.map(toRiver); // River [River [1], River [2], River [3]]
 
 river.flatMap(toRiver); // River [1, 2, 3]
 
-river.map(toRiver).flat() // River [1, 2, 3]
+river.map(toRiver).flat(); // River [1, 2, 3]
 ```
 
 Available in:
@@ -457,12 +579,22 @@ Flatten `Some` values and filter out `None`'s from the pipeline.
 The pipeline must be of type `Maybe`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  flatSome(): T extends Maybe<infer U> ? Pipeline<U> : never;
+}
+```
+
+```ts
+// usage
+
 import { Maybe } from '@nkp/maybe';
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([Maybe.some(1), Maybe.none, Maybe.some(3)]);
 
-river.flatSome(toRiver) // River [1, 3]
+river.flatSome(toRiver); // River [1, 3]
 ```
 
 Available in:
@@ -478,6 +610,16 @@ Provide a callback to run for each item in the pipeline.
 Similar to `Array.prototype.forEach`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  forEach(callbackfn: ((item: T) => unknown)): void;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
@@ -498,11 +640,21 @@ Stringify and join array elements with a separator.
 Similar to `Array.prototype.join`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  join(separator?: string): string;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver(['hello', 'world']);
 
-river.join(' ') //  'hello world'
+river.join(' '); //  'hello world'
 ```
 
 Available in:
@@ -518,11 +670,21 @@ May items in the pipeline;
 Similar to `Array.prototype.map`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  map<U>(callbackfn: ((item: T) => U)): Pipeline<U>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
-river.map(n => n + 1) // River [1, 2, 3]
+river.map(n => n + 1); // River [1, 2, 3]
 ```
 
 Available in:
@@ -536,6 +698,16 @@ Available in:
 Filter out items that don't match one of the given values from the pipeline.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  pick(...values: T): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
@@ -554,11 +726,21 @@ Available in:
 Keep only the first `n` items in the pipeline.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  pickFirst(count?: number): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
-river.pickFirst(2) // River [1, 2]
+river.pickFirst(2); // River [1, 2]
 ```
 
 Available in:
@@ -572,6 +754,16 @@ Available in:
 Keeps only items matching the given regex from the pipeline.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  pickMatching(regex: RegExp): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver(['index.html', 'style.css', 'script.js']);
@@ -592,6 +784,16 @@ Push items onto the end of the pipeline.
 Similar to `Array.prototype.push`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  push(...items: T[]): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
@@ -612,6 +814,16 @@ Reduce the pipeline to a single value.
 Similar to `Array.prototype.reduce`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  reduce<U>((next: T, accumulator: U) => U, initialValue: U): U;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
@@ -633,6 +845,16 @@ Reduce the pipeline to a single value, from right to left.
 Similar to `Array.prototype.reduceRight`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  reduceRight<U>((next: T, accumulator: U) => U, initialValue: U): U;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
@@ -654,6 +876,16 @@ Reverse elements in the pipeline.
 Similar to `Array.prototype.reverse`, but does not mutate the callee.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  reverse(): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
@@ -676,6 +908,16 @@ Slice elements from the pipeline from `start` to `end`.
 Similar to `Array.prototype.slice`.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  slice(from: number, to?: number): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([0, 1, 2, 3, 4]);
@@ -697,6 +939,16 @@ Returns `true` if the callback returns truthy for any value in the pipeline.
 Sibling of [every](#every).
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  every(callbackfn: ((item: T) => boolean)): boolean;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 toRiver([1, 2]).some(Boolean); // true
@@ -718,15 +970,42 @@ Sorts items in the pipeline with sensible defaults.
 Similar to `Array.prototype.sort`, but sorts numerically by default, not alphabetically, and does not mutate the callee.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  sort(direction:
+    | 'asc' | 'ASC'
+    | 'desc' | 'DESC'
+    | 1 | '1'
+    | -1 | '-1'
+    | ((a: T, b: T) => number)
+  ): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
-const pipeline: River<number> = toRiver([1, 3, 2]);
+// numeric only
+const numeric =   toRiver([1, 4, BigInt(3), 2]);
+numeric.sort(-1); // River [4, BigInt(3), 2, 1]
+numeric.sort(1);  // River [1, 2, BigInt(3), 4]
+numeric;          // River [1, 4, BigInt(3), 2]
 
-pipeline.sort(-1); // River [3, 2, 1]
+// alphabetical only - sort by char code
+const alpha =     toRiver(['a', 'c', 'B', 'd']);
+alpha.sort(-1);   // River ['d', 'c', 'a', 'B']
+alpha.sort(1);    // River ['B', 'a', 'c', 'd']
+alpha;            // River ['a', 'c', 'B', 'd']
 
-pipeline.sort(1); // River [1, 2, 3]
-
-pipeline; // River [1, 3, 2]
+// alphabetic and numeric
+// sorts numerically, then alphabetically
+const alpha =     toRiver([1, 'a', 3, 'c', 2, 'b']);
+alpha.sort(-1);   // River ['c', 'b', 'a', 3, 2, 1]
+alpha.sort(1);    // River [1, 2, 3, 'a', 'b', 'c']
+alpha;            // River [1, 'a', 3, 'c', 2, 'b']
 ```
 
 Available in:
@@ -740,6 +1019,16 @@ Available in:
 Transform the pipeline to an Array.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  toArray(): T[];
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
@@ -758,6 +1047,16 @@ Available in:
 Transform the pipeline to an ES6 Set.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  toSet(): Set<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3, 3]);
@@ -776,6 +1075,16 @@ Available in:
 Filter the pipeline to only include unique values.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  unique(): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 2]);
@@ -796,7 +1105,17 @@ Shift values onto the front of the pipeline
 Similar to `Array.prototype.shift`.
 
 ```ts
-import { River, toRiver } from '@nkp/iterable';
+// signature
+
+interface Pipeline<T> {
+  unshift(...values:T []): Pipeline<T>;
+}
+```
+
+```ts
+// usage
+
+import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
@@ -815,6 +1134,18 @@ Join two pipelines by index.
 The resulting pipeline ends when the final living input pipeline ends.
 
 ```ts
+// signature
+
+import { Maybe } from '@nkp/maybe';
+
+interface Pipeline<T> {
+  zipLong(iterable: Iterable<U>): Pipeline<[Maybe<T>, Maybe<U>]>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
@@ -840,6 +1171,16 @@ Join two pipelines by index.
 The resulting pipeline ends when the first input pipeline ends.
 
 ```ts
+// signature
+
+interface Pipeline<T> {
+  zipShort(iterable: Iterable<U>): Pipeline<[T, U]>;
+}
+```
+
+```ts
+// usage
+
 import { toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
