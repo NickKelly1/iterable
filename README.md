@@ -796,7 +796,7 @@ import { River, toRiver } from '@nkp/iterable';
 
 const river = toRiver([1, 2, 3]);
 
-river.shift(-1, -2, -3); // River<[-1, -2, -3, 1, 2, 3]>
+river.shift(-1, -2, -3); // River [-1, -2, -3, 1, 2, 3]
 ```
 
 Available in:
