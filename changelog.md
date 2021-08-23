@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.14 - 2021-08-22
+
+### Changed
+
+- No longer minify exports
+
 ## 0.0.13 - 2021-08-22
 
 ### Changed
