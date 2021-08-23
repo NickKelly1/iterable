@@ -1,12 +1,18 @@
 # Changelog
 
+## 0.0.17 - 202x-xx-xx
+
+### Changed
+
+- Updated readme.md
+
 ## 0.0.16 - 2021-08-22
 
 ### Changed
 
 - Changed `River` to `Collection`
 - Changed `Dam` to `LazyCollection`
-- Updated `readme.md`
+- Updated readme.md
 - Updated tests
 
 ### Removed
