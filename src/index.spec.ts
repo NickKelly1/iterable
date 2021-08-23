@@ -1,15 +1,13 @@
-import { toRiver, toDam, toBucket, Bucket, Dam, River  } from '.';
+import { collect, collectLazy } from '.';
+import { Collection } from './collection';
+import { LazyCollection } from './lazy-collection';
 
 describe('index', () => {
-  it('should export toRiver', () => {
-    expect(toRiver([1, 2, 3,])).toBeInstanceOf(River);
+  it('should export collect', () => {
+    expect(collect([1, 2, 3,])).toBeInstanceOf(Collection);
   });
 
-  it('should expor toBucket', () => {
-    expect(toBucket([1, 2, 3,])).toBeInstanceOf(Bucket);
-  });
-
-  it('should export toDam', () => {
-    expect(toDam([1, 2, 3,])).toBeInstanceOf(Dam);
+  it('should export collectLazy', () => {
+    expect(collectLazy([1, 2, 3,])).toBeInstanceOf(LazyCollection);
   });
 });

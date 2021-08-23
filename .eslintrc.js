@@ -53,10 +53,12 @@ const config = {
         'no-unused-vars': ['off',], // favour typescript's no-unused-vars
         'no-undef': ['off',], // favour typescript
         'no-redeclare': ['off',], // favour typescript
+        'no-dupe-class-members': ['off',], // favour typescript
         'no-trailing-spaces': ['error',],
         '@typescript-eslint/ban-ts-comment': ['off',],
         '@typescript-eslint/no-non-null-assertion': ['off',],
         '@typescript-eslint/no-this-alias': ['off',],
+
       },
     },
   ],

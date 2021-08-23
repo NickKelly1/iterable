@@ -1,10 +1,26 @@
 # Changelog
 
+## 0.0.16 - 2021-08-22
+
+### Changed
+
+- Changed `River` to `Collection`
+- Changed `Dam` to `LazyCollection`
+- Updated `readme.md`
+- Updated tests
+
+### Removed
+
+- Removed base `Pipeline` class
+- Removed base `Repeatable` class
+- Removed `Bucket` class
+
 ## 0.0.15 - 2021-08-22
 
 ### Changed
 
 - Updated dependencies
+- Updated tests
 
 ## 0.0.14 - 2021-08-22
 
@@ -52,10 +68,10 @@
 
 ### Added
 
-- `Pipeline.prototype.excludeMatching`
-- `Pipeline.prototype.pickMatching`
-- `Pipeline.prototype.excludeFirst`
-- `Pipeline.prototype.pickFirst`
+- `Pipeline.prototype.notMatching`
+- `Pipeline.prototype.matching`
+- `Pipeline.prototype.skip`
+- `Pipeline.prototype.take`
 - `Pipeline.prototype.unique`
 - Comprehensive tests for every `Pipeline.prototype` function
 - Test coverage
@@ -69,9 +85,9 @@
 
 ### Added
 
-- `Pipeline.prototype.excludeUndefined`
-- `Pipeline.prototype.excludeNull`
-- `Pipeline.prototype.excludeNullable`
+- `Pipeline.prototype.notUndefined`
+- `Pipeline.prototype.notNull`
+- `Pipeline.prototype.notNullable`
 - `Pipeline.prototype.extractSome`
 
 ## 0.0.5 - 2021-08-19

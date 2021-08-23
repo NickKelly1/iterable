@@ -1,40 +1,24 @@
-import { River } from './river';
-import { Bucket } from './bucket';
-import { Dam } from './dam';
+import { Collection } from './collection';
+import { LazyCollection } from './lazy-collection';
 import { Pipelineable } from './types';
 
-export * from './pipeline';
-export * from './types';
-export * from './river';
-export * from './dam';
-export * from './bucket';
 
 /**
- * Create a river
+ * Create a Collcetion
  *
  * @param value
  * @returns
  */
-export function toRiver<T>(value: Pipelineable<T>): River<T> {
-  return new River(value);
+export function collect<T>(value: Pipelineable<T>): Collection<T> {
+  return Collection.from(value);
 }
 
 /**
- * Create a bucket
+ * Create a Lazy Collection
  *
  * @param value
  * @returns
  */
-export function toBucket<T>(value: Pipelineable<T>): Bucket<T> {
-  return new Bucket(value);
-}
-
-/**
- * Creat a dam
- *
- * @param value
- * @returns
- */
-export function toDam<T>(value: Pipelineable<T>): Dam<T> {
-  return new Dam(value);
+export function collectLazy<T>(value: Pipelineable<T>): LazyCollection<T> {
+  return LazyCollection.from(value);
 }
