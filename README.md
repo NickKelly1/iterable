@@ -78,7 +78,7 @@ yarn add @nkp/iterable
 ## Collection types
 
 **type** | `Collection` | `LazyCollection` |
---- | --- | --- | --- |
+--- | --- | --- |
 **similar to** | array | generator |
 **memory** | heavy | light |
 **cpu** | light | heavy |
