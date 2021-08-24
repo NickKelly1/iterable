@@ -1,7 +1,11 @@
 import { Collection } from './collection';
 import { LazyCollection } from './lazy-collection';
-import { Pipelineable } from './types';
+import { Iterateable } from './types';
 
+export * from './types';
+export * from './collection';
+export * from './collection.interface';
+export * from './lazy-collection';
 
 /**
  * Create a Collcetion
@@ -9,7 +13,7 @@ import { Pipelineable } from './types';
  * @param value
  * @returns
  */
-export function collect<T>(value: Pipelineable<T>): Collection<T> {
+export function collect<T>(value: Iterateable<T>): Collection<T> {
   return Collection.from(value);
 }
 
@@ -19,6 +23,6 @@ export function collect<T>(value: Pipelineable<T>): Collection<T> {
  * @param value
  * @returns
  */
-export function collectLazy<T>(value: Pipelineable<T>): LazyCollection<T> {
+export function lazyCollect<T>(value: Iterateable<T>): LazyCollection<T> {
   return LazyCollection.from(value);
 }

@@ -1,26 +1,32 @@
 import { Maybe, None, Some } from '@nkp/maybe';
-import { smartSort } from './utils';
-import { Pipelineable, unpipeline } from './types';
+import { smartSort, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
+import { Betweenable, Iterateable, Orderable, SortDirection } from './types';
+import { ICollection, IHasFlatSome } from './collection.interface';
 
 /**
  * Lazy Collection
  */
-export class LazyCollection<T> implements Iterable<T> {
+export class LazyCollection<T> implements ICollection<T> {
+  protected _cache: Maybe<T[]> = Maybe.none;
+
   /**
    * Create a new LazyCollection
    */
-  static from<T>(pipelineable: Pipelineable<T>): LazyCollection<T> {
+  static from<T>(pipelineable: Iterateable<T>): LazyCollection<T> {
     return new LazyCollection(pipelineable);
   }
 
   /**
    * Create a LazyCollection
    *
-   * @param pipelineable
+   * @param root
    */
-  constructor(protected readonly pipelineable: Pipelineable<T>) {
-    //
+  constructor(protected readonly root: Iterateable<T>) {
+    // pre-cache if possible
+    if (Array.isArray(root)) {
+      this._cache = Maybe.some(root);
+    }
   }
 
   /**
@@ -29,7 +35,10 @@ export class LazyCollection<T> implements Iterable<T> {
    * @returns
    */
   protected getIterable(): Iterable<T> {
-    return unpipeline(this.pipelineable);
+    if (this._cache.isSome()) {
+      return this._cache.value[Symbol.iterator]();
+    }
+    return toIterable(this.root);
   }
 
   /**
@@ -53,17 +62,47 @@ export class LazyCollection<T> implements Iterable<T> {
   }
 
   /**
+   * If transformations have not been cached, cache them
+   *
+   * Otherwise, return the cached results
+   *
+   * @returns
+   */
+  protected _ensureCache(): T[] {
+    if (this._cache.isNone()) {
+      this._cache = Maybe.some(Array.from(toIterable(this.root)));
+    }
+    return this._cache.value;
+  }
+
+  /**
+   * Execute a side-effect callback for each item in the collection
+   *
+   * Return the original collection
+   *
+   * @param callbackfn
+   * @returns
+   */
+  tap(callbackfn: (item: T, i: number) => unknown): this {
+    this
+      ._ensureCache()
+      .forEach(function tapItem (item, index) {
+        callbackfn(item, index);
+      });
+    return this;
+  }
+
+  /**
    * Fire callback for each element of the Pipeline
    *
    * @param callbackfn
    */
-  forEach(callbackfn: (item: T, i: number) => unknown): LazyCollection<T> {
-    let i = 0;
-    for (const item of this) {
-      i += 1;
-      callbackfn(item, i);
-    }
-    return this;
+  forEach(callbackfn: (item: T, i: number) => unknown): void {
+    this
+      ._ensureCache()
+      .forEach(function tapItem (item, index) {
+        callbackfn(item, index);
+      });
   }
 
   /**
@@ -105,12 +144,12 @@ export class LazyCollection<T> implements Iterable<T> {
    * @param callbackfn
    * @returns
    */
-  flatMap<U>(callbackfn: (value: T, currentIndex: number) => Pipelineable<U>): LazyCollection<U> {
+  flatMap<U>(callbackfn: (value: T, currentIndex: number) => Iterateable<U>): LazyCollection<U> {
     const self = this;
     const iterable = function * (): Iterable<U> {
       let i = 0;
       for (const item of self) {
-        yield * unpipeline(callbackfn(item, i));
+        yield * toIterable(callbackfn(item, i));
         i += 1;
       }
     };
@@ -150,11 +189,11 @@ export class LazyCollection<T> implements Iterable<T> {
    */
   flatSome<U>(this: LazyCollection<Some<U>>,): LazyCollection<U>
   flatSome<U>(this: LazyCollection<Maybe<U>>,): LazyCollection<U>
-  flatSome(this: LazyCollection<None>,): LazyCollection<None>
+  flatSome(this: LazyCollection<None>,): LazyCollection<never>
   flatSome<U>(this: LazyCollection<Maybe<U>>): LazyCollection<U> {
     return this
       .filter(Maybe.isSome)
-      .map(item => item.value) as LazyCollection<U>;
+      .map(item => item.value);
   }
 
   /**
@@ -339,6 +378,21 @@ export class LazyCollection<T> implements Iterable<T> {
   }
 
   /**
+   * Concatenate items onto the pipeline
+   *
+   * @param precat
+   * @returns
+   */
+  precat(precat: Iterateable<T>): LazyCollection<T> {
+    const self = this;
+    function * iteratorable (): Iterable<T> {
+      yield * toIterable(precat);
+      yield * self;
+    }
+    return new LazyCollection(iteratorable);
+  }
+
+  /**
    * Sort items on the the pipeline
    *
    * Has sensible deafaults
@@ -346,14 +400,7 @@ export class LazyCollection<T> implements Iterable<T> {
    * @param sort
    * @returns
    */
-  sort(
-    sort:
-      | 'asc' | 'ASC'
-      | 'desc' | 'DESC'
-      | 1 | '1'
-      | -1 | '-1'
-      | ((a: T, b: T) => number)
-  ): LazyCollection<T> {
+  sort(sort: SortDirection<T>): LazyCollection<T> {
     const self = this;
 
     let direction: 1 | -1 = 1;
@@ -370,11 +417,11 @@ export class LazyCollection<T> implements Iterable<T> {
     const sortFn = typeof sort === 'function' ? sort : smartSort(direction);
 
     const iteratorable = function * (): Iterable<T> {
-      const items: T[] = [];
-      for (const item of self) {
-        items.push(item);
-      }
-      items.sort(sortFn);
+      // need to get the whole collection to sort
+      // so may as-well cache it not already
+      const items: T[] = Array
+        .from(self._ensureCache())
+        .sort(sortFn);
       yield * items;
     };
 
@@ -391,7 +438,11 @@ export class LazyCollection<T> implements Iterable<T> {
   reverse(): LazyCollection<T> {
     const self = this;
     function * iteratorable(): Iterable<T> {
-      const arr: T[] = self.toArray().reverse();
+      // need to get the whole collection to sort
+      // so may as-well cache it if not already
+      const arr: T[] = Array
+        .from(self._ensureCache())
+        .reverse();
       yield * arr;
     }
     return new LazyCollection(iteratorable);
@@ -550,9 +601,7 @@ export class LazyCollection<T> implements Iterable<T> {
    * @param callbackfn
    * @returns
    */
-  every(
-    callbackfn: (value: T, currentIndex: number) => boolean,
-  ): boolean {
+  every(callbackfn: (value: T, currentIndex: number) => boolean): boolean {
     let i = 0;
     for (const item of this) {
       if (!callbackfn(item, i)) return false;
@@ -568,9 +617,7 @@ export class LazyCollection<T> implements Iterable<T> {
    * @param callbackfn
    * @returns
    */
-  some(
-    callbackfn: (value: T, currentIndex: number) => boolean,
-  ): boolean {
+  some(callbackfn: (value: T, currentIndex: number) => boolean): boolean {
     let i = 0;
     for (const item of this) {
       if (callbackfn(item, i)) return true;
@@ -593,63 +640,164 @@ export class LazyCollection<T> implements Iterable<T> {
    * Find an item in the iterable
    */
   find(callbackfn: (value: T, currentIndex: number) => boolean): Maybe<T> {
-    const iterable = this.getIterable();
-    let i = 0;
-    for (const item of iterable) {
-      if (callbackfn(item, i)) return Maybe.some(item);
-      i += 1;
-    }
-    return Maybe.none;
+    const arr = this._ensureCache();
+    let result: Maybe<T> = Maybe.none;
+    arr.find(function findItem(item, index) {
+      if (callbackfn(item, index)) {
+        result = Maybe.some(item);
+        return true;
+      }
+      return false;
+    });
+    return result;
   }
 
   /**
    * Get the current size of the pipeline if run
    */
   getSize(): number {
-    const iterable = this.getIterable();
-    if (Array.isArray(iterable)) return iterable.length;
-    if (iterable instanceof Set) return iterable.size;
-    if (iterable instanceof Map) return iterable.size;
-    let i = 0;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const _ of iterable) { i += 1; }
-    return i;
+    return this
+      ._ensureCache()
+      .length;
   }
 
   /**
    * Find an index of an item in the iterable
    */
   findIndex(callbackfn: (value: T, currentIndex: number) => boolean): Maybe<number> {
-    const iterable = this.getIterable();
-    let i = 0;
-    for (const item of iterable) {
-      if (callbackfn(item, i)) return Maybe.some(i);
-      i += 1;
-    }
-    return Maybe.none;
+    const arr = this._ensureCache();
+    let result: Maybe<number> = Maybe.none;
+    arr.findIndex(function findItemIndex(item, index) {
+      if (callbackfn(item, index)) {
+        result = Maybe.some(index);
+        return true;
+      }
+      return false;
+    });
+    return result;
   }
 
   /**
    * Get the index of a value
    */
   indexOf(value: T): Maybe<number> {
-    const self = this;
-    const iterable = self.getIterable();
-
-    // shortcut for arrays
-    if (Array.isArray(iterable)) {
-      const index = iterable.indexOf(value);
-      if (index !== -1) return Maybe.some(index);
-      return Maybe.none;
-    } else {
-      let i = 0;
-      for (const item of iterable) {
-        if (item === value) return Maybe.some(i);
-        i += 1;
-      }
-      return Maybe.none;
-    }
+    const result = this._ensureCache().indexOf(value);
+    if (result === -1) return Maybe.none;
+    return Maybe.some(result);
   }
+
+  /**
+   * Keep only values less than the given value
+   *
+   * @param value
+   * @returns
+   */
+  lt(value: Orderable): LazyCollection<T> {
+    const _value = Number(value);
+    return this.filter(item => {
+      const number = Number(item);
+      if (Number.isNaN(item)) return false;
+      return number < _value;
+    });
+  }
+
+  /**
+   * Keep only values less than or equal to the given value
+   *
+   * @param value
+   * @returns
+   */
+  lte(value: Orderable): LazyCollection<T> {
+    const _value = Number(value);
+    return this.filter(item => {
+      const number = Number(item);
+      if (Number.isNaN(item)) return false;
+      return number <= _value;
+    });
+  }
+
+  /**
+   * Filter in values less than the given value
+   *
+   * @param value
+   * @returns
+   */
+  gt(value: Orderable): LazyCollection<T> {
+    const _value = Number(value);
+    return this.filter(item => {
+      const number = Number(item);
+      if (Number.isNaN(item)) return false;
+      return number > _value;
+    });
+  }
+
+  /**
+   * Keep only values greater than or equal to the given value
+   *
+   * @param value
+   * @returns
+   */
+  gte(value: Orderable): LazyCollection<T> {
+    const _value = Number(value);
+    return this.filter(item => {
+      const number = Number(item);
+      if (Number.isNaN(item)) return false;
+      return number >= _value;
+    });
+  }
+
+  /**
+   * Filter in values less than the given value
+   *
+   * @param value
+   * @returns
+   */
+  btw(left: Betweenable, right: Betweenable): LazyCollection<T> {
+    let li = true;
+    let lv: number;
+    if (typeof left === 'number')  lv = left;
+    else if (left instanceof Date) lv = left.valueOf();
+    else if (Array.isArray(left)) {
+      const leftValue = left[0]!;
+      if (typeof leftValue === 'number')  lv = leftValue;
+      else if (leftValue instanceof Date) lv = leftValue.valueOf();
+      li = left[1] ?? true;
+    }
+    else {
+      const leftValue = left.value!;
+      if (typeof leftValue === 'number')  lv = leftValue;
+      else if (leftValue instanceof Date) lv = leftValue.valueOf();
+      li = left.inclusive ?? true;
+    }
+
+    let ri = true;
+    let rv: number;
+    if (typeof right === 'number')  rv = right;
+    else if (right instanceof Date) rv = right.valueOf();
+    else if (Array.isArray(right)) {
+      const rightValue = right[0]!;
+      if (typeof rightValue === 'number')  rv = rightValue;
+      else if (rightValue instanceof Date) rv = rightValue.valueOf();
+      ri = right[1] ?? true;
+    }
+    else {
+      const rightValue = right.value!;
+      if (typeof rightValue === 'number')  rv = rightValue;
+      else if (rightValue instanceof Date) rv = rightValue.valueOf();
+      ri = right.inclusive ?? true;
+    }
+
+    return this.filter(item => {
+      const number = Number(item);
+      if (Number.isNaN(item)) return false;
+      if ((!li && number < lv)
+        || (li && number <= lv)
+        || (!ri && number > rv)
+        || (ri && number >= rv)) return false;
+      return true;
+    });
+  }
+
 
   /**
    * Get the n'th item in the pipeline if run
@@ -664,35 +812,16 @@ export class LazyCollection<T> implements Iterable<T> {
    * @returns
    */
   at(index: number): Maybe<T> {
-    const iterable = this.getIterable();
+    const arr = this._ensureCache();
 
     // shortcut for arrays
-    if (Array.isArray(iterable)) {
-      if (index >= 0) {
-        if (index >= iterable.length) return Maybe.none;
-        return Maybe.some(iterable[index]);
-      } else {
-        if (-index > iterable.length) return Maybe.none;
-        return Maybe.some(iterable[iterable.length - index]);
-      }
+    if (index >= 0) {
+      if (index >= arr.length) return Maybe.none;
+      return Maybe.some(arr[index]!);
     }
 
-    // long route for non-arrays
-    let i = 0;
-    if (i >= 0) {
-      // seek to index
-      for (const item of iterable) {
-        if (i === index) return Maybe.some(item);
-        i += 1;
-      }
-      return Maybe.none;
-    } else {
-      // i is negative
-      // collect as array and reverse index
-      const arr = this.toArray();
-      if (-index > arr.length) return Maybe.none;
-      return Maybe.some(arr[arr.length - index]!);
-    }
+    if (-index > arr.length) return Maybe.none;
+    return Maybe.some(arr[arr.length - index]!);
   }
 
   /**
@@ -701,8 +830,7 @@ export class LazyCollection<T> implements Iterable<T> {
    * @returns
    */
   toArray(): T[] {
-    const array: T[] = Array.from(this);
-    return array;
+    return this._ensureCache();
   }
 
   /**
@@ -711,8 +839,7 @@ export class LazyCollection<T> implements Iterable<T> {
    * @returns
    */
   toSet(): Set<T> {
-    const set: Set<T> = new Set(Array.from(this));
-    return set;
+    return new Set(this._ensureCache());
   }
 
   /**
@@ -721,6 +848,6 @@ export class LazyCollection<T> implements Iterable<T> {
    * @param this
    */
   toMap<K, V>(this: LazyCollection<[K, V]>): Map<K, V> {
-    return new Map(this);
+    return new Map(this._ensureCache());
   }
 }

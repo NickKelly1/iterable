@@ -2,6 +2,12 @@
 
 ## 0.0.17 - 202x-xx-xx
 
+### Added
+
+- Interfaces for methods
+- Interfaces for collections
+- Smart caching for `LazyCollection`
+
 ### Changed
 
 - Updated readme.md

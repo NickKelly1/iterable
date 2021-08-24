@@ -1,4 +1,4 @@
-import { collect, collectLazy } from '.';
+import { collect, lazyCollect } from '.';
 import { Collection } from './collection';
 import { LazyCollection } from './lazy-collection';
 
@@ -7,7 +7,7 @@ describe('index', () => {
     expect(collect([1, 2, 3,])).toBeInstanceOf(Collection);
   });
 
-  it('should export collectLazy', () => {
-    expect(collectLazy([1, 2, 3,])).toBeInstanceOf(LazyCollection);
+  it('should export lazyCollect', () => {
+    expect(lazyCollect([1, 2, 3,])).toBeInstanceOf(LazyCollection);
   });
 });

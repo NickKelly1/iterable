@@ -51,6 +51,6 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@nkp/maybe": "0.0.11"
+    "@nkp/maybe": "0.0.13"
   }
 }

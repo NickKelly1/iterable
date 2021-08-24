@@ -1,16 +1,17 @@
 import { Maybe, None, Some } from '@nkp/maybe';
-import { smartSort } from './utils';
-import { Pipelineable, unpipeline } from './types';
+import { smartSort, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
+import { Iterateable, Orderable, Betweenable } from './types';
+import { ICollection } from './collection.interface';
 
 /**
  * Collection
  */
-export class Collection<T> implements Iterable<T> {
+export class Collection<T> implements ICollection<T> {
   /**
    * Create a new Collection
    */
-  static from<T>(pipelineable: Pipelineable<T>): Collection<T> {
+  static from<T>(pipelineable: Iterateable<T>): Collection<T> {
     return new Collection(pipelineable);
   }
 
@@ -21,8 +22,8 @@ export class Collection<T> implements Iterable<T> {
    *
    * @param pipelineable
    */
-  constructor(pipelineable: Pipelineable<T>) {
-    const iterable = unpipeline(pipelineable);
+  constructor(pipelineable: Iterateable<T>) {
+    const iterable = toIterable(pipelineable);
     if (Array.isArray(iterable)) this.items = iterable;
     else this.items = Array.from(iterable);
   }
@@ -37,7 +38,7 @@ export class Collection<T> implements Iterable<T> {
   /**
    * Length of the collection
    */
-  get length(): number {
+  getSize(): number {
     return this.items.length;
   }
 
@@ -115,13 +116,13 @@ export class Collection<T> implements Iterable<T> {
    * @param callbackfn
    * @returns
    */
-  flatMap<U>(callbackfn: (value: T, currentIndex: number) => Pipelineable<U>): Collection<U> {
+  flatMap<U>(callbackfn: (value: T, currentIndex: number) => Iterateable<U>): Collection<U> {
     const collected: U[] = [];
     const to = this.items.length;
     for (let i = 0; i < to; i += 1) {
       const item = this.items[i]!;
       const iterable = callbackfn(item, i);
-      collected.push(...unpipeline(iterable));
+      collected.push(...toIterable(iterable));
     }
     return new Collection(collected);
   }
@@ -174,6 +175,204 @@ export class Collection<T> implements Iterable<T> {
   }
 
   /**
+   * Filter in values less than the given value
+   *
+   * @param value
+   * @returns
+   */
+  lt(value: Orderable): Collection<T> {
+    const collected: T[] = [];
+    const to = this.items.length;
+    const _value = Number(value);
+    for (let i = 0; i < to; i += 1) {
+      const item = this.items[i]!;
+      const number = Number(item);
+      if (!Number.isNaN(number) && number < _value) {
+        collected.push(item);
+      }
+    }
+    return new Collection(collected);
+  }
+
+  /**
+   * Filter in values less than the given value
+   *
+   * @param value
+   * @returns
+   */
+  lte(value: Orderable): Collection<T> {
+    const collected: T[] = [];
+    const to = this.items.length;
+    const _value = Number(value);
+    for (let i = 0; i < to; i += 1) {
+      const item = this.items[i]!;
+      const number = Number(item);
+      if (!Number.isNaN(number) && number <= _value) {
+        collected.push(item);
+      }
+    }
+    return new Collection(collected);
+  }
+
+  /**
+   * Filter in values less than the given value
+   *
+   * @param value
+   * @returns
+   */
+  gt(value: Orderable): Collection<T> {
+    const collected: T[] = [];
+    const to = this.items.length;
+    const _value = Number(value);
+    for (let i = 0; i < to; i += 1) {
+      const item = this.items[i]!;
+      const number = Number(item);
+      if (!Number.isNaN(number) && number > _value) {
+        collected.push(item);
+      }
+    }
+    return new Collection(collected);
+  }
+
+  /**
+   * Filter in values less than the given value
+   *
+   * @param value
+   * @returns
+   */
+  gte(value: Orderable): Collection<T> {
+    const collected: T[] = [];
+    const to = this.items.length;
+    const _value = Number(value);
+    for (let i = 0; i < to; i += 1) {
+      const item = this.items[i]!;
+      const number = Number(item);
+      if (!Number.isNaN(number) && number >= _value) {
+        collected.push(item);
+      }
+    }
+    return new Collection(collected);
+  }
+
+  /**
+   * Filter in values less than the given value
+   *
+   * @param value
+   * @returns
+   */
+  btw(left: Betweenable, right: Betweenable): Collection<T> {
+    const collected: T[] = [];
+    const to = this.items.length;
+
+    let li = true;
+    let lv: number;
+    if (typeof left === 'number')  lv = left;
+    else if (left instanceof Date) lv = left.valueOf();
+    else if (Array.isArray(left)) {
+      const leftValue = left[0]!;
+      if (typeof leftValue === 'number')  lv = leftValue;
+      else if (leftValue instanceof Date) lv = leftValue.valueOf();
+      li = left[1] ?? true;
+    }
+    else {
+      const leftValue = left.value!;
+      if (typeof leftValue === 'number')  lv = leftValue;
+      else if (leftValue instanceof Date) lv = leftValue.valueOf();
+      li = left.inclusive ?? true;
+    }
+
+    let ri = true;
+    let rv: number;
+    if (typeof right === 'number')  rv = right;
+    else if (right instanceof Date) rv = right.valueOf();
+    else if (Array.isArray(right)) {
+      const rightValue = right[0]!;
+      if (typeof rightValue === 'number')  rv = rightValue;
+      else if (rightValue instanceof Date) rv = rightValue.valueOf();
+      ri = right[1] ?? true;
+    }
+    else {
+      const rightValue = right.value!;
+      if (typeof rightValue === 'number')  rv = rightValue;
+      else if (rightValue instanceof Date) rv = rightValue.valueOf();
+      ri = right.inclusive ?? true;
+    }
+
+    // we try to avoid excessive branching inside function calls to keep
+    // everything fast
+    // that's why the same loop is repeated nearly 4 times
+    //
+    // some other popular libraries like Webpack achieve this by compiling
+    // code using new Function(...)
+    // but this use-case is simple enough that we can avoid it
+
+    switch (li) {
+    case true:
+      switch (ri) {
+      case true:
+        // [left, right]
+        for (let i = 0; i < to; i += 1) {
+          const item = this.items[i]!;
+          const number = Number(item);
+          if (!Number.isNaN(number)
+            && number >= lv!
+            && number <= rv!
+          ) {
+            collected.push(item);
+          }
+        }
+        break;
+      case false:
+        // [left, right)
+        for (let i = 0; i < to; i += 1) {
+          const item = this.items[i]!;
+          const number = Number(item);
+          if (!Number.isNaN(number)
+            && number >= lv!
+            && number < rv!
+          ) {
+            collected.push(item);
+          }
+        }
+        break;
+      }
+      break;
+    case false:
+      switch (ri) {
+      case true:
+        // (left, right]
+        for (let i = 0; i < to; i += 1) {
+          const item = this.items[i]!;
+          const number = Number(item);
+          if (!Number.isNaN(number)
+            && number > lv!
+            && number <= rv!
+          ) {
+            collected.push(item);
+          }
+        }
+        break;
+      case false:
+        // (left, right)
+        for (let i = 0; i < to; i += 1) {
+          const item = this.items[i]!;
+          const number = Number(item);
+          if (!Number.isNaN(number)
+            && number > lv!
+            && number < rv!
+          ) {
+            collected.push(item);
+          }
+        }
+        break;
+      }
+      break;
+    }
+
+    return new Collection(collected);
+  }
+
+  /**
    * Filter out the specific values
    *
    * @param value
@@ -197,9 +396,7 @@ export class Collection<T> implements Iterable<T> {
    * @param count
    * @returns
    */
-  skip(
-    count?: number,
-  ): Collection<T> {
+  skip(count?: number): Collection<T> {
     const _count = count ?? 1;
     const to = this.items.length;
     const collected: T[] = [];
@@ -349,9 +546,9 @@ export class Collection<T> implements Iterable<T> {
    * @param concat
    * @returns
    */
-  concat(concat: Pipelineable<T>): Collection<T> {
+  concat(concat: Iterateable<T>): Collection<T> {
     const collected: T[] = Array.from(this.items);
-    collected.push(...unpipeline(concat));
+    collected.push(...toIterable(concat));
     return new Collection(collected);
   }
 
@@ -368,11 +565,11 @@ export class Collection<T> implements Iterable<T> {
   /**
    * Concatenate items onto the pipeline
    *
-   * @param concat
+   * @param precat
    * @returns
    */
-  precat(concat: Pipelineable<T>): Collection<T> {
-    return new Collection([...unpipeline(concat),].concat(this.items));
+  precat(precat: Iterateable<T>): Collection<T> {
+    return new Collection([...toIterable(precat),].concat(this.items));
   }
 
   /**
@@ -438,9 +635,9 @@ export class Collection<T> implements Iterable<T> {
    * @param right
    * @returns
    */
-  zipShort<U>(right: Pipelineable<U>): Collection<[T, U]> {
+  zipShort<U>(right: Iterateable<U>): Collection<[T, U]> {
     const collected: [T, U][] = [];
-    const _right = [...unpipeline(right),];
+    const _right = [...toIterable(right),];
     const to = Math.min(this.items.length, _right.length);
     for (let i = 0; i < to; i += 1) {
       collected.push([this.items[i]!, _right[i]!,]);
@@ -454,11 +651,11 @@ export class Collection<T> implements Iterable<T> {
    * @param right
    * @returns
    */
-  zipLong<U>(right: Pipelineable<U>): Collection<[Maybe<T>, Maybe<U>]> {
+  zipLong<U>(right: Iterateable<U>): Collection<[Maybe<T>, Maybe<U>]> {
     const collected: [Maybe<T>, Maybe<U>][] = [];
 
     const _left = this.items;
-    const _right = Array.isArray(right) ? right : [...unpipeline(right),];
+    const _right = Array.isArray(right) ? right : [...toIterable(right),];
 
     const _leftLength = _left.length;
     const _rightLength = _right.length;
