@@ -853,4 +853,21 @@ export class Collection<T> implements ICollection<T> {
   toMap<K, V>(this: Collection<[K, V]>): Map<K, V> {
     return new Map(this);
   }
+
+  /**
+   * Write the collection to string
+   */
+  toString(): string {
+    // first 3 items
+    const size = this.getSize();
+    const display = this.slice(0, 4);
+
+    if (size === 0)
+      return `[object ${this.constructor.name} (${this.getSize()}) {}]`;
+
+    if (size <= 3)
+      return `[object ${this.constructor.name} (${this.getSize()}) { ${display.join(', ')} }]`;
+
+    return `[object ${this.constructor.name} (${this.getSize()}) { ${display.join(', ')}... }]`;
+  }
 }

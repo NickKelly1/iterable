@@ -2,7 +2,7 @@ import { Maybe, None, Some } from '@nkp/maybe';
 import { smartSort, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
 import { Betweenable, Iterateable, Orderable, SortDirection } from './types';
-import { ICollection, IHasFlatSome } from './collection.interface';
+import { ICollection } from './collection.interface';
 
 /**
  * Lazy Collection
@@ -851,5 +851,22 @@ export class LazyCollection<T> implements ICollection<T> {
    */
   toMap<K, V>(this: LazyCollection<[K, V]>): Map<K, V> {
     return new Map(this._ensureCache());
+  }
+
+  /**
+   * Write the collection to string
+   */
+  toString(): string {
+    // first 3 items
+    const size = this.getSize();
+    const display = this.slice(0, 4);
+
+    if (size === 0)
+      return `[object ${this.constructor.name} (${this.getSize()}) {}]`;
+
+    if (size <= 3)
+      return `[object ${this.constructor.name} (${this.getSize()}) { ${display.join(', ')} }]`;
+
+    return `[object ${this.constructor.name} (${this.getSize()}) { ${display.join(', ')}... }]`;
   }
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.21 - 2021-08-23
+
+### Added
+
+- `Collection.prototype.toString`
+- `LazyCollection.prototype.toString`
+
 ## 0.0.20 - 2021-08-23
 
 ### Changed
