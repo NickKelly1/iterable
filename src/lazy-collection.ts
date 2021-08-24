@@ -794,7 +794,7 @@ export class LazyCollection<T> implements ICollection<T> {
         (li ? number >= lv : number > lv)
         && (ri ? number <= rv : number < rv)
       ) {
-        return false;
+        return true;
       }
       return true;
     });

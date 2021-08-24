@@ -5,6 +5,7 @@
 ### Changed
 
 - Fixed `LazyCollection.prototype.btw`
+- Fixed export file names
 
 ## 0.0.18 - 2021-08-23
 
