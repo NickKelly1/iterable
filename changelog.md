@@ -1,11 +1,17 @@
 # Changelog
 
+## 0.0.20 - 2021-08-23
+
+### Changed
+
+- Fixed `LazyCollection.prototype.btw`
+- Fixed exported file names
+
 ## 0.0.19 - 2021-08-23
 
 ### Changed
 
 - Fixed `LazyCollection.prototype.btw`
-- Fixed export file names
 
 ## 0.0.18 - 2021-08-23
 
