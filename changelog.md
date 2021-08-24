@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.18 - 2021-08-23
+
+### Changed
+
+- Fixed `LazyCollection.prototype.btw`
+
 ## 0.0.17 - 2021-08-23
 
 ### Added

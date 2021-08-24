@@ -790,10 +790,10 @@ export class LazyCollection<T> implements ICollection<T> {
     return this.filter(item => {
       const number = Number(item);
       if (Number.isNaN(item)) return false;
-      if ((!li && number < lv)
-        || (li && number <= lv)
-        || (!ri && number > rv)
-        || (ri && number >= rv)) return false;
+      if ((!li && number > lv)
+        || (li && number >= lv)
+        || (!ri && number < rv)
+        || (ri && number <= rv)) return false;
       return true;
     });
   }
