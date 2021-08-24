@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.22 - 2021-08-23
+
+### Changed
+
+- Updated dependencies
+
 ## 0.0.21 - 2021-08-23
 
 ### Added
