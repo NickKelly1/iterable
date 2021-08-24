@@ -11,6 +11,7 @@
 ### Changed
 
 - Updated readme.md
+- Updated dependencies
 
 ## 0.0.16 - 2021-08-22
 
