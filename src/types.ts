@@ -33,3 +33,5 @@ export type SortDirection<T> =
   | -1 | '-1'
   | ((a: T, b: T) => number)
 ;
+
+export interface Unary<T, R> { (arg: T): R; }

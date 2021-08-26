@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.24 - 2021-08-25
+
+### Changed
+
+- Renamed `Collection.prototype.fork` to `Collection.prototype.forkFlat`
+- Renamed `Collection.prototype.split` to `Collection.prototype.forkMap`
+- Renamed `LazyCollection.prototype.fork` to `LazyCollection.prototype.forkFlat`
+- Renamed `LazyCollection.prototype.split` to `LazyCollection.prototype.forkMap`
+
 ## 0.0.23 - 2021-08-25
 
 ### Added
