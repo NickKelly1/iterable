@@ -4,6 +4,9 @@ import { $ANY, $TODO } from './utility-types';
 import { Betweenable, Iterateable, Orderable, SortDirection } from './types';
 import { ICollection } from './collection.interface';
 
+export interface ForkLazyCollection<T, R> { (collection: LazyCollection<T> ): R; }
+
+
 /**
  * Lazy Collection
  */
@@ -104,6 +107,70 @@ export class LazyCollection<T> implements ICollection<T> {
         callbackfn(item, index);
       });
   }
+
+  /**
+   * Fork into separate collections which can be transformed separately
+   * Combine and flatten into a resulting collection
+   *
+   * @param forks
+   */
+  fork<R1>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>]): LazyCollection<R1>
+  fork<R1, R2>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>]): LazyCollection<R1 | R2>
+  fork<R1, R2, R3>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>]): LazyCollection<R1 | R2 | R3>
+  fork<R1, R2, R3, R4>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>]): LazyCollection<R1 | R2 | R3 | R4>
+  fork<R1, R2, R3, R4, R5>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>]): LazyCollection<R1 | R2 | R3 | R4 | R5>
+  fork<R1, R2, R3, R4, R5, R6>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6>
+  fork<R1, R2, R3, R4, R5, R6, R7>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>, ForkLazyCollection<T, Iterateable<R8>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>, ForkLazyCollection<T, Iterateable<R8>>, ForkLazyCollection<T, Iterateable<R9>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>, ForkLazyCollection<T, Iterateable<R8>>, ForkLazyCollection<T, Iterateable<R9>>, ForkLazyCollection<T, Iterateable<R10>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>, ForkLazyCollection<T, Iterateable<R8>>, ForkLazyCollection<T, Iterateable<R9>>, ForkLazyCollection<T, Iterateable<R10>>, ForkLazyCollection<T, Iterateable<R11>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>, ForkLazyCollection<T, Iterateable<R8>>, ForkLazyCollection<T, Iterateable<R9>>, ForkLazyCollection<T, Iterateable<R10>>, ForkLazyCollection<T, Iterateable<R11>>, ForkLazyCollection<T, Iterateable<R12>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>, ForkLazyCollection<T, Iterateable<R8>>, ForkLazyCollection<T, Iterateable<R9>>, ForkLazyCollection<T, Iterateable<R10>>, ForkLazyCollection<T, Iterateable<R11>>, ForkLazyCollection<T, Iterateable<R12>>, ForkLazyCollection<T, Iterateable<R13>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>, ForkLazyCollection<T, Iterateable<R8>>, ForkLazyCollection<T, Iterateable<R9>>, ForkLazyCollection<T, Iterateable<R10>>, ForkLazyCollection<T, Iterateable<R11>>, ForkLazyCollection<T, Iterateable<R12>>, ForkLazyCollection<T, Iterateable<R13>>, ForkLazyCollection<T, Iterateable<R14>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13 | R14>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...forks: readonly [ForkLazyCollection<T, Iterateable<R1>>, ForkLazyCollection<T, Iterateable<R2>>, ForkLazyCollection<T, Iterateable<R3>>, ForkLazyCollection<T, Iterateable<R4>>, ForkLazyCollection<T, Iterateable<R5>>, ForkLazyCollection<T, Iterateable<R6>>, ForkLazyCollection<T, Iterateable<R7>>, ForkLazyCollection<T, Iterateable<R8>>, ForkLazyCollection<T, Iterateable<R9>>, ForkLazyCollection<T, Iterateable<R10>>, ForkLazyCollection<T, Iterateable<R11>>, ForkLazyCollection<T, Iterateable<R12>>, ForkLazyCollection<T, Iterateable<R13>>, ForkLazyCollection<T, Iterateable<R14>>, ForkLazyCollection<T, Iterateable<R15>>]): LazyCollection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15>
+  fork<R>(...forks: readonly (ForkLazyCollection<T, Iterateable<R>>)[]): LazyCollection<R>
+  fork<R>(...forks: readonly (ForkLazyCollection<T, Iterateable<R>>)[]): LazyCollection<R> {
+    const combined = this
+      // split forks
+      .split(...forks)
+      // collect results
+      .map((splits) => splits.map(stream => new LazyCollection(stream)))
+      // join results
+      .flat()
+      .flat();
+    return combined;
+  }
+
+  /**
+   * Split the collection apart and return a collection with only 1 item - the result of the splits
+   *
+   * Similar to Promise.all
+   */
+  split<R1>(...splits: readonly [ForkLazyCollection<T, R1>]): LazyCollection<[R1]>
+  split<R1, R2>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>]): LazyCollection<[R1, R2]>
+  split<R1, R2, R3>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>]): LazyCollection<[R1, R2, R3]>
+  split<R1, R2, R3, R4>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>]): LazyCollection<[R1, R2, R3, R4]>
+  split<R1, R2, R3, R4, R5>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>]): LazyCollection<[R1, R2, R3, R4, R5]>
+  split<R1, R2, R3, R4, R5, R6>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>]): LazyCollection<[R1, R2, R3, R4, R5, R6]>
+  split<R1, R2, R3, R4, R5, R6, R7>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>, ForkLazyCollection<T, R8>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>, ForkLazyCollection<T, R8>, ForkLazyCollection<T, R9>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>, ForkLazyCollection<T, R8>, ForkLazyCollection<T, R9>, ForkLazyCollection<T, R10>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>, ForkLazyCollection<T, R8>, ForkLazyCollection<T, R9>, ForkLazyCollection<T, R10>, ForkLazyCollection<T, R11>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>, ForkLazyCollection<T, R8>, ForkLazyCollection<T, R9>, ForkLazyCollection<T, R10>, ForkLazyCollection<T, R11>, ForkLazyCollection<T, R12>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>, ForkLazyCollection<T, R8>, ForkLazyCollection<T, R9>, ForkLazyCollection<T, R10>, ForkLazyCollection<T, R11>, ForkLazyCollection<T, R12>, ForkLazyCollection<T, R13>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>, ForkLazyCollection<T, R8>, ForkLazyCollection<T, R9>, ForkLazyCollection<T, R10>, ForkLazyCollection<T, R11>, ForkLazyCollection<T, R12>, ForkLazyCollection<T, R13>, ForkLazyCollection<T, R14>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...splits: readonly [ForkLazyCollection<T, R1>, ForkLazyCollection<T, R2>, ForkLazyCollection<T, R3>, ForkLazyCollection<T, R4>, ForkLazyCollection<T, R5>, ForkLazyCollection<T, R6>, ForkLazyCollection<T, R7>, ForkLazyCollection<T, R8>, ForkLazyCollection<T, R9>, ForkLazyCollection<T, R10>, ForkLazyCollection<T, R11>, ForkLazyCollection<T, R12>, ForkLazyCollection<T, R13>, ForkLazyCollection<T, R14>, ForkLazyCollection<T, R15>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
+  split<R>(...splits: readonly (ForkLazyCollection<T, R>)[]): LazyCollection<R[]>
+  split<R>(...splits: readonly (ForkLazyCollection<T, R>)[]): LazyCollection<R[]> {
+    const self = this;
+    function * iterateable(): Iterable<R[]> {
+      yield splits.map(split => split(self));
+    }
+    return new LazyCollection(iterateable);
+  }
+
 
   /**
    * Get the first value
@@ -859,7 +926,7 @@ export class LazyCollection<T> implements ICollection<T> {
   toString(): string {
     // first 3 items
     const size = this.getSize();
-    const display = this.slice(0, 4);
+    const display = this.slice(0, 3);
 
     if (size === 0)
       return `[object ${this.constructor.name} (${this.getSize()}) {}]`;

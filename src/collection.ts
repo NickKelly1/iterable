@@ -4,6 +4,8 @@ import { $ANY, $TODO } from './utility-types';
 import { Iterateable, Orderable, Betweenable } from './types';
 import { ICollection } from './collection.interface';
 
+export interface ForkCollection<T, R> { (collection: Collection<T> ): R; }
+
 /**
  * Collection
  */
@@ -20,11 +22,12 @@ export class Collection<T> implements ICollection<T> {
   /**
    * Create a collection
    *
-   * @param pipelineable
+   * @param iterateable
    */
-  constructor(pipelineable: Iterateable<T>) {
-    const iterable = toIterable(pipelineable);
+  constructor(iterateable: Iterateable<T>) {
+    const iterable = toIterable(iterateable);
     if (Array.isArray(iterable)) this.items = iterable;
+    else if (iterateable instanceof Collection) this.items = iterateable._getArrayReference();
     else this.items = Array.from(iterable);
   }
 
@@ -69,6 +72,65 @@ export class Collection<T> implements ICollection<T> {
       callbackfn(this.items[i]!, i);
     }
     return this;
+  }
+
+  /**
+   * Fork into separate collections which can be transformed separately
+   * Combine and flatten into a resulting collection
+   *
+   * @param forks
+   */
+  fork<R1>(...forks: readonly [ForkCollection<T, Iterateable<R1>>]): Collection<R1>
+  fork<R1, R2>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>]): Collection<R1 | R2>
+  fork<R1, R2, R3>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>]): Collection<R1 | R2 | R3>
+  fork<R1, R2, R3, R4>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>]): Collection<R1 | R2 | R3 | R4>
+  fork<R1, R2, R3, R4, R5>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>]): Collection<R1 | R2 | R3 | R4 | R5>
+  fork<R1, R2, R3, R4, R5, R6>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6>
+  fork<R1, R2, R3, R4, R5, R6, R7>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>, ForkCollection<T, Iterateable<R8>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>, ForkCollection<T, Iterateable<R8>>, ForkCollection<T, Iterateable<R9>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>, ForkCollection<T, Iterateable<R8>>, ForkCollection<T, Iterateable<R9>>, ForkCollection<T, Iterateable<R10>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>, ForkCollection<T, Iterateable<R8>>, ForkCollection<T, Iterateable<R9>>, ForkCollection<T, Iterateable<R10>>, ForkCollection<T, Iterateable<R11>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>, ForkCollection<T, Iterateable<R8>>, ForkCollection<T, Iterateable<R9>>, ForkCollection<T, Iterateable<R10>>, ForkCollection<T, Iterateable<R11>>, ForkCollection<T, Iterateable<R12>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>, ForkCollection<T, Iterateable<R8>>, ForkCollection<T, Iterateable<R9>>, ForkCollection<T, Iterateable<R10>>, ForkCollection<T, Iterateable<R11>>, ForkCollection<T, Iterateable<R12>>, ForkCollection<T, Iterateable<R13>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>, ForkCollection<T, Iterateable<R8>>, ForkCollection<T, Iterateable<R9>>, ForkCollection<T, Iterateable<R10>>, ForkCollection<T, Iterateable<R11>>, ForkCollection<T, Iterateable<R12>>, ForkCollection<T, Iterateable<R13>>, ForkCollection<T, Iterateable<R14>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13 | R14>
+  fork<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...forks: readonly [ForkCollection<T, Iterateable<R1>>, ForkCollection<T, Iterateable<R2>>, ForkCollection<T, Iterateable<R3>>, ForkCollection<T, Iterateable<R4>>, ForkCollection<T, Iterateable<R5>>, ForkCollection<T, Iterateable<R6>>, ForkCollection<T, Iterateable<R7>>, ForkCollection<T, Iterateable<R8>>, ForkCollection<T, Iterateable<R9>>, ForkCollection<T, Iterateable<R10>>, ForkCollection<T, Iterateable<R11>>, ForkCollection<T, Iterateable<R12>>, ForkCollection<T, Iterateable<R13>>, ForkCollection<T, Iterateable<R14>>, ForkCollection<T, Iterateable<R15>>]): Collection<R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15>
+  fork<R>(...forks: readonly (ForkCollection<T, Iterateable<R>>)[]): Collection<R>
+  fork<R>(...forks: readonly (ForkCollection<T, Iterateable<R>>)[]): Collection<R> {
+    const combined = this
+      // split forks
+      .split(...forks)
+      // collect results
+      .map((splits) => splits.map(stream => new Collection(stream)))
+      // join results
+      .flat()
+      .flat();
+    return combined;
+  }
+
+  /**
+   * Split the collection apart and return a collection with only 1 item - the result of the splits
+   *
+   * Similar to Promise.all
+   */
+  split<R1>(...splits: readonly [ForkCollection<T, R1>]): Collection<[R1]>
+  split<R1, R2>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>]): Collection<[R1, R2]>
+  split<R1, R2, R3>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>]): Collection<[R1, R2, R3]>
+  split<R1, R2, R3, R4>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>]): Collection<[R1, R2, R3, R4]>
+  split<R1, R2, R3, R4, R5>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>]): Collection<[R1, R2, R3, R4, R5]>
+  split<R1, R2, R3, R4, R5, R6>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>]): Collection<[R1, R2, R3, R4, R5, R6]>
+  split<R1, R2, R3, R4, R5, R6, R7>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>]): Collection<[R1, R2, R3, R4, R5, R6, R7]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>, ForkCollection<T, R8>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>, ForkCollection<T, R8>, ForkCollection<T, R9>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8, R9]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>, ForkCollection<T, R8>, ForkCollection<T, R9>, ForkCollection<T, R10>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>, ForkCollection<T, R8>, ForkCollection<T, R9>, ForkCollection<T, R10>, ForkCollection<T, R11>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>, ForkCollection<T, R8>, ForkCollection<T, R9>, ForkCollection<T, R10>, ForkCollection<T, R11>, ForkCollection<T, R12>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>, ForkCollection<T, R8>, ForkCollection<T, R9>, ForkCollection<T, R10>, ForkCollection<T, R11>, ForkCollection<T, R12>, ForkCollection<T, R13>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>, ForkCollection<T, R8>, ForkCollection<T, R9>, ForkCollection<T, R10>, ForkCollection<T, R11>, ForkCollection<T, R12>, ForkCollection<T, R13>, ForkCollection<T, R14>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14]>
+  split<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...splits: readonly [ForkCollection<T, R1>, ForkCollection<T, R2>, ForkCollection<T, R3>, ForkCollection<T, R4>, ForkCollection<T, R5>, ForkCollection<T, R6>, ForkCollection<T, R7>, ForkCollection<T, R8>, ForkCollection<T, R9>, ForkCollection<T, R10>, ForkCollection<T, R11>, ForkCollection<T, R12>, ForkCollection<T, R13>, ForkCollection<T, R14>, ForkCollection<T, R15>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
+  split<R>(...splits: readonly (ForkCollection<T, R>)[]): Collection<R[]>
+  split<R>(...splits: readonly (ForkCollection<T, R>)[]): Collection<R[]> {
+    return new Collection([splits.map(split => split(this)),]);
   }
 
   /**
@@ -828,6 +890,15 @@ export class Collection<T> implements ICollection<T> {
   }
 
   /**
+   * Get a reference to the internal array of the collection
+   *
+   * Useful for immutable utilities that so they can avoid cloning the array
+   */
+  protected _getArrayReference(): T[] {
+    return this.items;
+  }
+
+  /**
    * Trasnform the Pipeline to an array
    *
    * @returns
@@ -860,7 +931,7 @@ export class Collection<T> implements ICollection<T> {
   toString(): string {
     // first 3 items
     const size = this.getSize();
-    const display = this.slice(0, 4);
+    const display = this.slice(0, 3);
 
     if (size === 0)
       return `[object ${this.constructor.name} (${this.getSize()}) {}]`;

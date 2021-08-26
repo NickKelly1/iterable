@@ -1,7 +1,22 @@
-export interface IterableCreator<T> { (): Iterable<T>; }
+import { Collection } from './collection';
+import { LazyCollection } from './lazy-collection';
+
+export interface IterableCreator<T> {
+  ():
+    | Array<T>
+    | Collection<T>
+    | Iterable<T>
+    | LazyCollection<T>
+    | Set<T>
+}
+
 export type Iterateable<T> =
-  | Iterable<T>
   | IterableCreator<T>
+  | Array<T>
+  | Collection<T>
+  | Iterable<T>
+  | LazyCollection<T>
+  | Set<T>
 ;
 
 export type Orderable = number | Date;

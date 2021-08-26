@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.23 - 2021-08-25
+
+### Added
+
+- `Collection.prototype.fork`
+- `Collection.prototype.split`
+- `LazyCollection.prototype.fork`
+- `LazyCollection.prototype.split`
+
 ## 0.0.22 - 2021-08-23
 
 ### Changed

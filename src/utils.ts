@@ -18,10 +18,10 @@ export function smartSort(direction: -1 | 1) {
 /**
  * Convert the iterateable to iterable
  *
- * @param pipelineable
+ * @param iterateable
  * @returns
  */
-export function toIterable<T>(pipelineable: Iterateable<T>): Iterable<T> {
-  if (typeof pipelineable === 'function') return pipelineable();
-  return pipelineable;
+export function toIterable<T>(iterateable: Iterateable<T>): Iterable<T> {
+  if (typeof iterateable === 'function') return iterateable();
+  return iterateable;
 }
