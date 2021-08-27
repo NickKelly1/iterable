@@ -1,244 +1,243 @@
-import { collect, lazyCollect } from '../src';
+import { collect, Collection, lazyCollect, LazyCollection } from '../src';
+import { performance } from 'perf_hooks';
 
-function * generator(ops: number): Iterable<number> {
-  for (let i = 0; i < ops; i += 1) {
-    const radians = i * Math.PI / 100;
-    yield Math.floor((100 * Math.sin(radians)));
+interface SpecOptions { name: string, fn: () => void; }
+class Spec {
+  public readonly name: string;
+  public readonly fn: (() => unknown);
+  constructor(options: SpecOptions) {
+    const { name, fn, } = options;
+    this.name = name;
+    this.fn = fn;
   }
 }
 
-interface IBenchmark {
-  name: string;
-  ops: number;
-  run(): unknown;
-}
+interface BenchmarkOptions { name: string, specs: (ops: number) => SpecOptions[]; }
+class Benchmark {
+  public readonly name: string;
+  public readonly specs: ((ops: number) => Spec[]);
 
-class BenchmarkCollectionMap implements IBenchmark {
-  name = 'Collection:map';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return collect(generator(this.ops))
-      .map(n => n + 1);
+  constructor(options: BenchmarkOptions ) {
+    const { name, specs, } = options;
+    this.name = name;
+    this.specs = (ops: number) => specs(ops).map(specOpts => new Spec(specOpts));
   }
 }
 
-class BenchmarkLazyCollectionMap implements IBenchmark {
-  name = 'LazyCollection:map';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return lazyCollect(generator(this.ops))
-      .map(n => n + 1)
-      .toArray();
-  }
+interface CreateSpecs {
+  (args: {
+    array: Array<number>,
+    collection: Collection<number>,
+    lazy: LazyCollection<number>
+  }): SpecOptions[]
 }
-
-class BenchmarkArrayMap implements IBenchmark {
-  name = 'Array:map';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return [...generator(this.ops),]
-      .map(n => n + 1);
-  }
-}
-
-class BenchmarkCollectionFlatMap implements IBenchmark {
-  name = 'Collection:flatMap';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return collect(generator(this.ops))
-      .flatMap(n => [n + 1,])
-      .toArray();
-  }
-}
-
-class BenchmarkLazyCollectionFlatMap implements IBenchmark {
-  name = 'LazyCollection:flatMap';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return lazyCollect(generator(this.ops))
-      .flatMap(n => [n + 1,])
-      .toArray();
-  }
-}
-
-class BenchmarkArrayFlatMap implements IBenchmark {
-  name = 'Array:flatMap';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return [...generator(this.ops),]
-      .flatMap(n => [n + 1,]);
-  }
-}
-
-class BenchmarkCollectionFilter implements IBenchmark {
-  name = 'Collection:filter';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return collect(generator(this.ops))
-      .filter(n => n > 0)
-      .toArray();
-  }
-}
-
-class BenchmarkLazyCollectionFilter implements IBenchmark {
-  name = 'LazyCollection:filter';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return lazyCollect(generator(this.ops))
-      .filter(n => n > 0)
-      .toArray();
-  }
-}
-
-class BenchmarkArrayFilter implements IBenchmark {
-  name = 'Array:filter';
-  constructor(public readonly ops: number) {}
-  run(): Iterable<number> {
-    return [...generator(this.ops),]
-      .filter(n => n > 0);
-  }
+function createSpecs(specsFactory: CreateSpecs): BenchmarkOptions['specs'] {
+  return function(ops: number): SpecOptions[] {
+    const array = Array.from({ length: ops, }, (_, i) => i + 1);
+    const collection = collect(array);
+    const lazy = lazyCollect(array);
+    const specs = specsFactory({ array, collection, lazy, });
+    return specs;
+  };
 }
 
 
-function run(...benchmarks: IBenchmark[]) {
-  const results: {
-    name: string,
-    duration: number,
-    opssec: number,
-  }[] = [];
-
-  for (const bench of benchmarks) {
-    const start = performance.now();
-    bench.run();
-    const end = performance.now();
-    const duration = Math.round(end - start);
-    const opssec = Math.round(bench.ops / duration);
-    results.push({
-      name: bench.name,
-      duration,
-      opssec,
-    });
-  }
-
-  // take averages
-  interface Average { name: string; opssecs: number[]; }
-  const averages = new Map<string, Average>();
-  for (const result of results) {
-    let average = averages.get(result.name);
-    if (!average) {
-      average = { name: result.name, opssecs: [], };
-      averages.set(result.name, average);
+const fmt = Intl.NumberFormat();
+function run(maxops: number, benchmarks: Benchmark[]) {
+  // run benchmarks
+  interface IBenchmarkStats { name: string; groups: Map<string, IGroupStats>; }
+  interface IGroupStats { name: string; opssec: number; runs: number, }
+  const stats = new Map<string, IBenchmarkStats>();
+  for (const benchmark of benchmarks) {
+    let benchStat: IBenchmarkStats;
+    if (stats.has(benchmark.name)) {
+      benchStat = stats.get(benchmark.name)!;
+    } else {
+      benchStat = { name: benchmark.name, groups: new Map(), };
+      stats.set(benchmark.name, benchStat);
     }
-    average.opssecs.push(result.opssec);
+
+    for (let ops = 1; ops < maxops; ops += 1){
+      for (const spec of benchmark.specs(ops)) {
+        const start = performance.now();
+        spec.fn();
+        const end = performance.now();
+        const delta = end - start;
+        let groupStat: IGroupStats;
+        if (benchStat.groups.has(spec.name)) {
+          groupStat = benchStat.groups.get(spec.name)!;
+          groupStat.opssec = ((ops / delta) + (groupStat.opssec * groupStat.runs)) / (groupStat.runs + 1);
+          groupStat.runs += 1;
+        } else {
+          groupStat = { name: spec.name, opssec: ops / delta, runs: 1, };
+          benchStat.groups.set(spec.name, groupStat);
+        }
+      }
+    }
   }
 
-  // log averages
-  console.table(Array
-    .from(averages.values())
-    .map((v) => ({
-      name: v.name,
-      rank: 0,
-      oppsec: Math.round(v.opssecs.reduce((n, a) => n + a, 0) / v.opssecs.length),
-      runs: v.opssecs.length,
-    }))
-    .sort((a, b) => b.oppsec - a.oppsec)
-    .map((v, i) => ({ ...v, rank: i, })));
-}
+  // compile stats
+  interface ICompiledGroupStats { name: string, rank: number, opsec: number, opsecStr: string }
+  interface ICompiledBenchStats { name: string, groups: ICompiledGroupStats[] }
+  const compiledBenches = [];
+  for (const benchStat of stats.values()) {
+    const compiledBench: ICompiledBenchStats = { name: benchStat.name, groups: [], };
+    for (const groupStat of benchStat.groups.values()) {
+      compiledBench.groups.push({
+        name: groupStat.name,
+        rank: 0,
+        opsec: groupStat.opssec,
+        opsecStr: fmt.format(Math.round(groupStat.opssec)),
+      });
+    }
 
-function mod(number: number, modulo: number) {
-  const result = ((number % modulo ) + modulo ) % modulo;
-  return result;
-}
+    // sort and rank
+    compiledBench.groups = compiledBench
+      .groups
+      .sort((a, b) => b.opsec - a.opsec)
+      .map((g, i) => ({ ...g, rank: i + 1,}));
 
-function cycle<U>(arr: U[], by: number): U[] {
-  const _arr: U[] = [];
-  for (let i = 0; i < arr.length; i += 1) {
-    _arr.push(arr[mod(i - by, arr.length)]!);
-  }
-  return _arr;
-}
-
-function combine<T>(...args: (() => T)[]): T[] {
-  const _combinations: T[] = [];
-
-  for (let i = 0; i < args.length; i += 1) {
-    _combinations.push(...cycle(args.map(arg => arg()), i));
+    compiledBenches.push(compiledBench);
   }
 
-  return [..._combinations, ..._combinations.reverse(),];
+  console.table(compiledBenches
+    .flatMap(bench => bench
+      .groups
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .map(({ opsec, ...g }) => ({ benchmark: bench.name, ...g, }))));
 }
 
-run(...combine(
-  () => new BenchmarkArrayMap(250_000),
-  () => new BenchmarkCollectionMap(250_000),
-  () => new BenchmarkLazyCollectionMap(250_000),
+const benchForEach = new Benchmark({
+  name: 'forEach',
+  specs: createSpecs(({ array, collection, lazy, }) => [
+    { name: 'Lazy', fn: () => lazy.forEach(n => n + 1), },
+    { name: 'Array', fn: () => array.forEach(n => n + 1), },
+    { name: 'Collection', fn: () => collection.forEach(n => n + 1), },
+  ]),
+});
 
-  () => new BenchmarkLazyCollectionMap(250_000),
-  () => new BenchmarkCollectionMap(250_000),
-  () => new BenchmarkArrayMap(250_000),
-));
+const benchMap = new Benchmark({
+  name: 'map',
+  specs: createSpecs(({ array, collection, lazy, }) => [
+    { name: 'Lazy', fn: () => lazy.map(n => n + 1).toArray(), },
+    { name: 'Array', fn: () => array.map(n => n + 1), },
+    { name: 'Collection', fn: () => collection.map(n => n + 1), },
+  ]),
+});
 
-//   new BenchmarkArrayMap(100_000),
-//   new BenchmarkCollectionMap(100_000),
-//   new BenchmarkLazyCollectionMap(100_000),
-//   new BenchmarkLazyCollectionMap(100_000),
-//   new BenchmarkCollectionMap(100_000),
-//   new BenchmarkArrayMap(100_000),
+const benchFlatMap = new Benchmark({
+  name: 'flatMap',
+  specs: createSpecs(({ array, collection, lazy, }) => [
+    { name: 'Lazy', fn: () => lazy.flatMap(n => [n + 1,]).toArray(), },
+    { name: 'Array', fn: () => array.flatMap(n => [n + 1,]), },
+    { name: 'Collection', fn: () => collection.flatMap(n => [n + 1,]), },
+  ]),
+});
 
-//   new BenchmarkArrayMap(100_000),
-//   new BenchmarkCollectionMap(100_000),
-//   new BenchmarkLazyCollectionMap(100_000),
-//   new BenchmarkLazyCollectionMap(100_000),
-//   new BenchmarkCollectionMap(100_000),
-//   new BenchmarkArrayMap(100_000),
+const benchFilter = new Benchmark({
+  name: 'filter',
+  specs: createSpecs(({ array, collection, lazy, }) => [
+    { name: 'Lazy', fn: () => lazy.filter(n => n > 1).toArray(), },
+    { name: 'Array', fn: () => array.filter(n => n > 1), },
+    { name: 'Collection', fn: () => collection.filter(n => n > 1), },
+  ]),
+});
 
-//   new BenchmarkCollectionMap(100_000),
-//   new BenchmarkLazyCollectionMap(100_000),
-//   new BenchmarkArrayMap(100_000),
-//   new BenchmarkCollectionMap(100_000),
-//   new BenchmarkLazyCollectionMap(100_000),
-//   new BenchmarkArrayMap(100_000),
+const benchReduce = new Benchmark({
+  name: 'reduce',
+  specs: createSpecs(({ array, collection, lazy, }) => [
+    { name: 'Lazy', fn: () => lazy.reduce((n, a) => n + a, 0), },
+    { name: 'Array', fn: () => array.reduce((n, a) => n + a, 0), },
+    { name: 'Collection', fn: () => collection.reduce((n, a) => n + a, 0), },
+  ]),
+});
 
-//   new BenchmarkArrayMap(100_000),
-//   new BenchmarkCollectionMap(100_000),
-//   new BenchmarkLazyCollectionMap(100_000),
-//   new BenchmarkArrayMap(100_000),
-//   new BenchmarkCollectionMap(100_000),
-//   new BenchmarkLazyCollectionMap(100_000),
-// );
+const benchReduceRight = new Benchmark({
+  name: 'reduceRight',
+  specs: createSpecs(({ array, collection, lazy, }) => [
+    { name: 'Lazy', fn: () => lazy.reduceRight((n, a) => n + a, 0), },
+    { name: 'Array', fn: () => array.reduceRight((n, a) => n + a, 0), },
+    { name: 'Collection', fn: () => collection.reduceRight((n, a) => n + a, 0), },
+  ]),
+});
 
-// run(
-//   new BenchmarkArrayFlatMap(100_000),
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
+const benchFind = new Benchmark({
+  name: 'find',
+  specs: createSpecs(({ array, collection, lazy, }) => {
+    const mid = Math.floor((array.length / 2));
+    const target = array[mid]!;
+    return [
+      { name: 'Lazy', fn: () => lazy.find((value) => value === target), },
+      { name: 'Array', fn: () => array.find((value) => value === target), },
+      { name: 'Collection', fn: () => collection.find((value) => value === target), },
+    ];
+  }),
+});
 
-//   new BenchmarkArrayFlatMap(100_000),
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkArrayFlatMap(100_000),
+const benchFindIndex = new Benchmark({
+  name: 'findIndex',
+  specs: createSpecs(({ array, collection, lazy, }) => {
+    const mid = Math.floor((array.length / 2));
+    const target = array[mid]!;
+    return [
+      { name: 'Lazy', fn: () => lazy.findIndex((value) => value === target), },
+      { name: 'Array', fn: () => array.findIndex((value) => value === target), },
+      { name: 'Collection', fn: () => collection.findIndex((value) => value === target), },
+    ];
+  }),
+});
 
-//   new BenchmarkArrayFlatMap(100_000),
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkArrayFlatMap(100_000),
+const benchIndexOf = new Benchmark({
+  name: 'indexOf',
+  specs: createSpecs(({ array, collection, lazy, }) => {
+    const mid = Math.floor((array.length / 2));
+    const target = array[mid]!;
+    return [
+      { name: 'Lazy', fn: () => lazy.indexOf(target), },
+      { name: 'Array', fn: () => array.indexOf(target), },
+      { name: 'Collection', fn: () => collection.indexOf(target), },
+    ];
+  }),
+});
 
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
-//   new BenchmarkArrayFlatMap(100_000),
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
-//   new BenchmarkArrayFlatMap(100_000),
+new Benchmark({
+  name: 'map',
+  specs: createSpecs(({ array, collection, lazy, }) => [
+    { name: 'Lazy', fn: () => lazy.map(n => n + 1).toArray(), },
+    { name: 'Array', fn: () => array.map(n => n + 1), },
+    { name: 'Collection', fn: () => collection.map(n => n + 1), },
+  ]),
+});
 
-//   new BenchmarkArrayFlatMap(100_000),
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
-//   new BenchmarkArrayFlatMap(100_000),
-//   new BenchmarkCollectionFlatMap(100_000),
-//   new BenchmarkLazyCollectionFlatMap(100_000),
-// );
 
+console.log('---------- optimising run');
+
+// first run - let everything optimise
+// otherwise numbers are wildly inconsistent
+run(20_000, [
+  benchForEach,
+  benchFlatMap,
+  benchMap,
+  benchFilter,
+  benchFind,
+  benchReduce,
+  benchReduceRight,
+  benchFindIndex,
+  benchIndexOf,
+]);
+
+console.log('---------- benchmark run');
+
+// subsequent runs - everything is optimised by now
+run(20_000, [
+  benchForEach,
+  benchFlatMap,
+  benchMap,
+  benchFilter,
+  benchFind,
+  benchReduce,
+  benchReduceRight,
+  benchFindIndex,
+  benchIndexOf,
+]);
 
