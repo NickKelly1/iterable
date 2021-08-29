@@ -4,9 +4,11 @@
 [![Node.js Package](https://github.com/NickKelly1/nkp-iterable/actions/workflows/release.yml/badge.svg)](https://github.com/NickKelly1/nkp-iterable/actions/workflows/release.yml)
 ![Known Vulnerabilities](https://snyk.io/test/github/NickKelly1/nkp-iterable/badge.svg)
 
-Collection utility classes for synchronous and lazy iteration over iterables like arrays, sets, maps and generators.
+Immutable collection utility classes for synchronous and lazy iteration over iterables like arrays, sets, maps and generators.
 
-@nkp/iterable exposes two main utility classes, `Collection` and `LazyCollection`.
+`@nkp/iterable` exposes two main utility classes, `Collection` and `LazyCollection`.
+
+The `Collection` class performs faster than the native JavaScript `Array` class for many methods because it does not check for array holes.
 
 ## Table of contents
 
@@ -14,7 +16,6 @@ Collection utility classes for synchronous and lazy iteration over iterables lik
   - [npm](#npm)
   - [yarn](#yarn)
   - [exports](#exports)
-- [Benchmarks](#benchmarks)
 - [Array Holes](#array-hols)
 - [Collection Types](#collection-types)
   - [Collection](#collection)
@@ -71,7 +72,6 @@ Collection utility classes for synchronous and lazy iteration over iterables lik
     - [unshift](#unshift)
     - [zipLong](#zip-long)
     - [zipShort](#zip-short)
-
 - [Publishing a new version](#publishing-a-new-version)
 
 ## Installation
@@ -91,74 +91,6 @@ yarn add @nkp/iterable
 ### Exports
 
 `@nkp/iterable` targets CommonJS and ES modules. To utilise ES modules consider using a bundler like `webpack` or `rollup`.
-
-## Benchmarks
-
----------- optimising run
-┌─────────┬───────────────┬──────────────┬──────┬─────────────┐
-│ (index) │   benchmark   │     name     │ rank │  opsecStr   │
-├─────────┼───────────────┼──────────────┼──────┼─────────────┤
-│    0    │   'forEach'   │ 'Collection' │  1   │ '1,088,146' │
-│    1    │   'forEach'   │   'Array'    │  2   │ '1,084,480' │
-│    2    │   'forEach'   │    'Lazy'    │  3   │  '651,001'  │
-│    3    │   'flatMap'   │ 'Collection' │  1   │  '33,634'   │
-│    4    │   'flatMap'   │    'Lazy'    │  2   │   '6,650'   │
-│    5    │   'flatMap'   │   'Array'    │  3   │   '4,563'   │
-│    6    │     'map'     │   'Array'    │  1   │  '147,261'  │
-│    7    │     'map'     │ 'Collection' │  2   │  '146,167'  │
-│    8    │     'map'     │    'Lazy'    │  3   │  '10,835'   │
-│    9    │   'filter'    │ 'Collection' │  1   │  '144,131'  │
-│   10    │   'filter'    │   'Array'    │  2   │  '88,189'   │
-│   11    │   'filter'    │    'Lazy'    │  3   │  '10,725'   │
-│   12    │    'find'     │   'Array'    │  1   │  '936,494'  │
-│   13    │    'find'     │ 'Collection' │  2   │  '889,193'  │
-│   14    │    'find'     │    'Lazy'    │  3   │  '405,979'  │
-│   15    │   'reduce'    │   'Array'    │  1   │  '734,285'  │
-│   16    │   'reduce'    │ 'Collection' │  2   │  '661,910'  │
-│   17    │   'reduce'    │    'Lazy'    │  3   │  '25,304'   │
-│   18    │ 'reduceRight' │   'Array'    │  1   │  '669,591'  │
-│   19    │ 'reduceRight' │ 'Collection' │  2   │  '533,460'  │
-│   20    │ 'reduceRight' │    'Lazy'    │  3   │   '7,451'   │
-│   21    │  'findIndex'  │   'Array'    │  1   │  '969,338'  │
-│   22    │  'findIndex'  │ 'Collection' │  2   │  '898,335'  │
-│   23    │  'findIndex'  │    'Lazy'    │  3   │  '420,154'  │
-│   24    │   'indexOf'   │   'Array'    │  1   │ '1,538,413' │
-│   25    │   'indexOf'   │    'Lazy'    │  2   │ '1,483,643' │
-│   26    │   'indexOf'   │ 'Collection' │  3   │ '1,452,005' │
-└─────────┴───────────────┴──────────────┴──────┴─────────────┘
-
----------- benchmark run
-┌─────────┬───────────────┬──────────────┬──────┬─────────────┐
-│ (index) │   benchmark   │     name     │ rank │  opsecStr   │
-├─────────┼───────────────┼──────────────┼──────┼─────────────┤
-│    0    │   'forEach'   │ 'Collection' │  1   │ '1,134,659' │
-│    1    │   'forEach'   │   'Array'    │  2   │ '1,133,094' │
-│    2    │   'forEach'   │    'Lazy'    │  3   │  '340,639'  │
-│    3    │   'flatMap'   │ 'Collection' │  1   │  '33,583'   │
-│    4    │   'flatMap'   │    'Lazy'    │  2   │   '6,562'   │
-│    5    │   'flatMap'   │   'Array'    │  3   │   '4,541'   │
-│    6    │     'map'     │ 'Collection' │  1   │  '145,656'  │
-│    7    │     'map'     │   'Array'    │  2   │  '137,510'  │
-│    8    │     'map'     │    'Lazy'    │  3   │  '10,659'   │
-│    9    │   'filter'    │ 'Collection' │  1   │  '143,612'  │
-│   10    │   'filter'    │   'Array'    │  2   │  '79,243'   │
-│   11    │   'filter'    │    'Lazy'    │  3   │  '10,606'   │
-│   12    │    'find'     │   'Array'    │  1   │  '971,365'  │
-│   13    │    'find'     │ 'Collection' │  2   │  '925,742'  │
-│   14    │    'find'     │    'Lazy'    │  3   │  '447,489'  │
-│   15    │   'reduce'    │ 'Collection' │  1   │  '780,162'  │
-│   16    │   'reduce'    │   'Array'    │  2   │  '728,186'  │
-│   17    │   'reduce'    │    'Lazy'    │  3   │  '24,942'   │
-│   18    │ 'reduceRight' │ 'Collection' │  1   │  '533,160'  │
-│   19    │ 'reduceRight' │   'Array'    │  2   │  '478,091'  │
-│   20    │ 'reduceRight' │    'Lazy'    │  3   │   '7,497'   │
-│   21    │  'findIndex'  │   'Array'    │  1   │  '970,189'  │
-│   22    │  'findIndex'  │ 'Collection' │  2   │  '901,645'  │
-│   23    │  'findIndex'  │    'Lazy'    │  3   │  '446,089'  │
-│   24    │   'indexOf'   │   'Array'    │  1   │ '1,543,753' │
-│   25    │   'indexOf'   │    'Lazy'    │  2   │ '1,506,553' │
-│   26    │   'indexOf'   │ 'Collection' │  3   │ '1,461,690' │
-└─────────┴───────────────┴──────────────┴──────┴─────────────┘
 
 ## Array Holes
 
@@ -183,11 +115,11 @@ Because `@nkp/iterable` assumes hole-less arrays, the `Collection` class is fast
 
 `Collection` is similar to the native JavaScript `Array` class.
 
-Like an array, `Collection's` items exist in memory at all times.
+Like an array, `Collection's` values exist in memory at all times.
 
-`Collection` is memory heavy and *very* fast. `Collection` is even faster than the native JavaScript `Array` class in many situations.
+`Collection` is memory heavy and *very* fast. `Collection` is even faster than the native JavaScript `Array` class in many situations because it doesn't check for holes.
 
-`Collection's` methods cause instantaneous transformations of it's internal items, as opposed to `LazyCollection` which only runs transformations when items are requested.
+`Collection's` methods cause instantaneous transformations of it's internal values, as opposed to `LazyCollection` which only runs transformations when values are requested.
 
 ```ts
 import { collect } from '@nkp/iterable';
@@ -215,9 +147,9 @@ collection.toArray(); // Array [4, 3]
 - **speed**: slow
 - **memory**: light
 
-`LazyCollection` is a lazy stream that's only calculated when items are requested.
+`LazyCollection` is a lazy stream that's only calculated when values are requested.
 
-`LazyCollection` does not store its items in memory, only a reference to the initial iterable provided to it.
+`LazyCollection` does not store its values in memory, only a reference to the initial iterable provided to it.
 
 `LazyCollection` stores transformations and doesn't execute them until the caller requests data from it.
 
@@ -254,9 +186,9 @@ called;             // true
 lazy;               // LazyCollection [4, 3]
 ```
 
-Internally, items are cached
-    1. when `LazyCollection` requires all items in memory for a transformation
-    2. when the items are requested from the callee
+Internally, values are cached
+    1. when `LazyCollection` requires all values in memory for a transformation
+    2. when the values are requested from the callee
 
 ```ts
 const input = [1, 2, 3];
@@ -265,9 +197,9 @@ const lazy = new LazyCollection(input)
   .exclude(4)
   .sort();        // LazyCollection [input]
 
-lazy.toArray();    // all transformations run on [1, 2, 3]
-lazy.toArray();    // cached results are returned, transformations do not run again
-lazy.item(1);      // cached results are returned, transformations do not run again
+lazy.toArray();   // all transformations run on [1, 2, 3]
+lazy.toArray();   // cached results are returned, transformations do not run again
+lazy.at(1);       // cached results are returned, transformations do not run again
 ```
 
 ## Usage
@@ -276,7 +208,7 @@ lazy.item(1);      // cached results are returned, transformations do not run ag
 
 #### at
 
-Get the item at a specified index.
+Get the value at a specified index.
 
 Providing a negative index searches the collection from back-to-front.
 
@@ -306,7 +238,7 @@ collect([1, 2]).at(-3);   // None
 
 #### btw
 
-Filter in items between the two limits.
+Keep values between the two limits.
 
 ```ts
 // signature
@@ -318,11 +250,43 @@ interface IHasBtw<T> extends Iterable<T> {
 }
 ```
 
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+// numbers
+const numbers = collect([1, 2, 3, 4, 5]);
+
+numbers.btw(2, 4);                               // Collection [2, 3, 4]
+numbers.btw([2, true], 4);                       // Collection [2, 3, 4]
+numbers.btw([2, false], 4);                      // Collection [   3, 4]
+numbers.btw(2, [4, true]);                       // Collection [2, 3, 4]
+numbers.btw(2, [4, false]);                      // Collection [2  3   ]
+numbers.btw({ value: 2, inclusive: true }, 4);   // Collection [2, 3, 4]
+numbers.btw({ value: 2, inclusive: false }, 4);  // Collection [   3, 4]
+numbers.btw(2, { value: 4, inclusive: true });   // Collection [2, 3, 4]
+numbers.btw(2, { value: 4, inclusive: false });  // Collection [2, 3   ]
+
+// dates
+const dates = collect([
+  new Date('1990-01-01'),
+  new Date('2000-01-01'),
+  new Date('2010-01-01'),
+]);
+
+dates.btw(
+  new Date('1995-01-01'),
+  new Date('2005-01-01'),
+); // Collection [Date('2000-01-01')]
+//
+```
+
 #### concat
 
 Concatenate an iterable onto the end of the collection.
 
-Unlike `Array.protototype.concat`, `IHasConcat` only accepts a single array argument and does not accept spread arguments for consistent behavior. For spread arguments use [push](#push);
+Unlike `Array.protototype.concat`, `IHasConcat.concat` only accepts a single array argument and does not accept variadic arguments. For spread arguments use [push](#push);
 
 ```ts
 // signature
@@ -345,7 +309,7 @@ collect([1, 2]).concat([3, 4]); // Collection [1, 2, 3, 4]
 
 #### every
 
-Returns `true` if the callback returns truthy for every value in the collection.
+Returns `true` if the given callback returns truthy for every value in the collection.
 
 Similar to `Array.prototype.every` and sibling of [some](#some).
 
@@ -369,7 +333,7 @@ collect([0, 1]).every(n => n >= 0); // true
 
 #### exclude
 
-Filters items out of the collection if they match any of the given values.
+Removes values from the collection that equal any of the given values.
 
 ```ts
 // signature
@@ -389,7 +353,7 @@ collect([1, 2, 3]).exclude(1, 2); // Collection [3]
 
 #### filter
 
-Removes items from a collection if their callback returns falsy.
+Removes values from the collection if their callback returns falsy.
 
 Similar to `Array.prototype.filter`.
 
@@ -414,7 +378,7 @@ collection.filter(n => n > 1); // Collection [2, 3]
 
 #### find
 
-Find the item in the collection.
+Find a value in the collection.
 
 Similar to `Array.prototype.find` but returns `Maybe<T>` instead of `T | undefined`.
 
@@ -441,7 +405,7 @@ collection.find(4); // None
 
 #### findIndex
 
-Find the index of an item in the collection.
+Find the index of a value in the collection.
 
 Similar to `Array.prototype.findIndex` but returns `Maybe<number>` instead of `number`.
 
@@ -468,9 +432,9 @@ collection.findIndex(4); // None
 
 #### first
 
-Get the first item from the collection.
+Get the first value from the collection.
 
-Returns `Some<T>` if the item exists, otherwise returns `None`.
+Returns `Some<T>` if the value exists, otherwise returns `None`.
 
 ```ts
 // signature
@@ -520,7 +484,7 @@ collection.flat(); // Collection [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 #### flatMap
 
-Map the collections items to iterables and flatten them into single collection.
+Map the collection's values to iterables and flatten them into single collection.
 
 Similar to `Array.prototype.flatMap`.
 
@@ -550,7 +514,7 @@ collection.map(collect).flat(); // Collection [1, 2, 3]
 
 Flatten `Some` values and filter out `None`'s from the collection.
 
-The pipeline must be of type `Maybe`.
+The collection must be of type `Maybe`.
 
 ```ts
 // signature
@@ -577,7 +541,7 @@ collection.flatSome(); // Collection [1, 3]
 
 #### forEach
 
-Provide a callback to run for each item in the collection.
+Execute a callback for each value in the collection.
 
 Similar to `Array.prototype.forEach`.
 
@@ -633,7 +597,7 @@ collection.forkFlat(
 
 #### forkMap
 
-Fork the collection to split and operate on it's parts independently then join the results into a tuple (array) and return a single-value collection with the tuple as it's only value.
+Fork the collection to split and operate on it's parts independently then join the results into a tuple (array) and return a single-valued collection with the tuple as it's only value.
 
 Similar to `Promise.all`, but for collections.
 
@@ -769,7 +733,7 @@ collection.getSize(); // 3;
 
 #### gt
 
-Keep items greater-than the given value.
+Keep values greater-than the given value.
 
 ```ts
 // signature
@@ -793,7 +757,7 @@ collection.gt(2); // Collection [3]
 
 #### gte
 
-Keep items greater-than or equal-to the given value.
+Keep values greater-than or equal-to the given value.
 
 ```ts
 // signature
@@ -817,7 +781,7 @@ collection.gte(2); // Collection [2, 3]
 
 #### indexOf
 
-Get the index of the item in the collection.
+Get the index of the value in the collection.
 
 ```ts
 // signature
@@ -842,7 +806,7 @@ collection.indexOf(4); // None
 
 #### join
 
-Stringify and join collection items with a separator.
+Stringify and join collection values with a separator.
 
 Similar to `Array.prototype.join`.
 
@@ -866,7 +830,7 @@ collection.join(' '); //  'hello world'
 
 #### lt
 
-Keep items less-than the given value.
+Keep values less-than the given value.
 
 ```ts
 // signature
@@ -890,7 +854,7 @@ collection.lt(2); // Collection [1]
 
 #### lte
 
-Keep items less-than or equal-to the given value.
+Keep values less-than or equal-to the given value.
 
 ```ts
 // signature
@@ -914,7 +878,7 @@ collection.lte(2); // Collection [1, 2]
 
 #### map
 
-Map items in the collection.
+Map values in the collection.
 
 Similar to `Array.prototype.map`.
 
@@ -939,7 +903,7 @@ collection.map(n => n + 1); // Collection [1, 2, 3]
 
 #### matching
 
-Keeps only items matching the given regex.
+Keeps values matching the given regex.
 
 ```ts
 // signature
@@ -961,7 +925,7 @@ collection.matching(/\.css$/); // Collection ['style.css']
 
 #### notMatching
 
-Removes items matching the given regex from the collection.
+Removes values matching the given regex from the collection.
 
 ```ts
 // signature
@@ -1049,7 +1013,7 @@ collection.notUndefined(); // Collection [1, 3]
 
 #### pick
 
-Keep only matching items in the collection.
+Keep values in the collection that equal any of the given values.
 
 ```ts
 // signature
@@ -1093,9 +1057,9 @@ collect([1, 2]).concat([3, 4]); // Collection [1, 2, 3, 4]
 
 #### push
 
-Push items onto the end of the collection.
+Push values onto the end of the collection.
 
-Similar to `Array.prototype.push`.
+Similar to `Array.prototype.push` but returns the new collection instead of the number of arguments pushed.
 
 ```ts
 // signature
@@ -1137,7 +1101,7 @@ import { collect } from '@nkp/iterable';
 
 const collection = collect([1, 2, 3]);
 
-// sum the pipeline from left-to-right
+// sum the collection from left-to-right
 collection.reduce((next, acc) => acc + next, 0); // 6
 ```
 
@@ -1163,13 +1127,13 @@ import { collect } from '@nkp/iterable';
 
 const collection = collect([1, 2, 3]);
 
-// stringify and concatenate the pipeline items from right-to-left
+// stringify and concatenate the collection values from right-to-left
 collection.reduceRight((next, acc) => acc + String(next), ''); // '321'
 ```
 
 #### reverse
 
-Reverse items in the collection.
+Reverse the ordering of values in the collection.
 
 Similar to `Array.prototype.reverse` but does not mutate the callee.
 
@@ -1196,7 +1160,7 @@ collection;           // Collection [1, 2, 3]
 
 #### skip
 
-Removes the first `n` items from the collection.
+Removes the first `n` values from the collection.
 
 ```ts
 // signature
@@ -1217,7 +1181,7 @@ collect([1, 2, 3]).skip(2); // Collection [3]
 
 #### slice
 
-Slice elements from the pipeline from `start` to `end`.
+Slice elements from the collection from `start` to `end`.
 
 Similar to `Array.prototype.slice`.
 
@@ -1269,7 +1233,7 @@ collect([0, false]).some(Boolean); // false
 
 #### sort
 
-Sorts items in the collection with sensible defaults.
+Sorts values in the collection with sensible defaults.
 
 Similar to `Array.prototype.sort` but sorts numerically by default instead of alphabetically and does not mutate the callee.
 
@@ -1323,7 +1287,7 @@ alpha.sort(-1);   // Collection ['c', 'b', 'a', 3, 2, 1]
 
 #### take
 
-Keep only the first `n` items in the collection.
+Keep the first `n` values in the collection.
 
 ```ts
 // signature
@@ -1345,7 +1309,7 @@ collection.take(2); // Collection [1, 2]
 
 ### tap
 
-Execute a callback for each item in the collection without changing the collection.
+Execute a callback for each value in the collection without changing the collection.
 
 Useful for logging.
 
@@ -1380,7 +1344,7 @@ collection
 
 Execute a callback with a reference to the collection itself.
 
-Returns the collection itself.
+Returns the original collection.
 
 Useful for logging.
 
@@ -1476,7 +1440,7 @@ collection.toMap(); // Map [[1, 1], [2, 2], [3, 3]]
 
 #### unique
 
-Filter the collection to only include unique values.
+Remove duplicate values from the collection.
 
 ```ts
 // signature
