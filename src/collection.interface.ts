@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Maybe, None, Some } from '@nkp/maybe';
 import { Betweenable, Iterateable, Orderable, SortDirection, Unary } from './types';
 
@@ -16,7 +17,7 @@ export interface IHasConcat<T> extends Iterable<T> {
 }
 
 export interface IHasEvery<T> extends Iterable<T> {
-  every(callbackfn: (value: T, currentIndex: number) => boolean): boolean;
+  every(callbackfn: ((value: T, currentIndex: number) => boolean)): boolean;
 }
 
 export interface IHasExclude<T> extends Iterable<T> {
@@ -38,6 +39,11 @@ export interface IHasFindIndex<T> extends Iterable<T> {
   findIndex(callbackfn: (value: T, currentIndex: number) => boolean): Maybe<number>;
 }
 
+// TODO: test
+export interface IHasFirst<T> extends Iterable<T> {
+  first(): Maybe<T>;
+}
+
 export interface IHasFlat<T> extends Iterable<T> {
   flat<U>(this: IHasFlat<Iterable<U>>): IHasFlat<U>;
 }
@@ -53,7 +59,7 @@ export interface IHasFlatSome<T> extends Iterable<T> {
 }
 
 export interface IHasForEach<T> extends Iterable<T> {
-  forEach(callbackfn: ((item: T, index: number) => unknown)): void;
+  forEach(callbackfn: ((value: T, index: number) => unknown)): void;
 }
 
 // TODO: test
@@ -91,15 +97,15 @@ export interface IHasLte<T> extends Iterable<T> {
 }
 
 export interface IHasMap<T> extends Iterable<T> {
-  map<U>(callbackfn: ((item: T, index: number) => U)): IHasMap<U>;
+  map<U>(callbackfn: ((value: T, index: number) => U)): IHasMap<U>;
 }
 
 export interface IHasMatching<T> extends IHasForEach<T> {
-  matching(regexp: RegExp): IHasMatching<T>;
+  matching(regexp: RegExp | string): IHasMatching<T>;
 }
 
 export interface IHasNotMatching<T> extends Iterable<T> {
-  notMatching(regexp: RegExp): IHasNotMatching<T>;
+  notMatching(regexp: RegExp | string): IHasNotMatching<T>;
 }
 
 export interface IHasNotNull<T> extends Iterable<T> {
@@ -128,11 +134,11 @@ export interface IHasPush<T> extends Iterable<T> {
 }
 
 export interface IHasReduce<T> extends Iterable<T> {
-  reduce<U>( callbackfn: ((previousValue: T, currentValue: U, currentIndex: number) => U), initial: U,): U;
+  reduce<U>(callbackfn: ((previousValue: T, currentValue: U, currentIndex: number) => U), initial: U,): U;
 }
 
 export interface IHasReduceRight<T> extends Iterable<T> {
-  reduceRight<U>( callbackfn: ((previousValue: T, currentValue: U, currentIndex: number) => U), initial: U,): U;
+  reduceRight<U>(callbackfn: ((previousValue: T, currentValue: U, currentIndex: number) => U), initial: U,): U;
 }
 
 export interface IHasReverse<T> extends Iterable<T> {
@@ -161,7 +167,7 @@ export interface IHasTake<T> extends Iterable<T> {
 
 // TODO: test
 export interface IHasTap<T> extends Iterable<T> {
-  tap(callbackfn: ((item: T, index: number) => unknown)): this;
+  tap(callbackfn: ((value: T, index: number) => unknown)): this;
 }
 
 // TODO: test
@@ -199,31 +205,35 @@ export interface IHasZipShort<T> extends Iterable<T> {
 }
 
 // TODO: test
-interface IHasFork<T> extends Iterable<T> {
-  forkFlat<R>(...forks: readonly (Unary<this, Iterateable<R>>)[]): IHasFork<R>;
+export interface IHasForkOn<T> extends Iterable<T> {
+  forkOn<R>(callbackfn: ((value: T, index: number) => R)): IHasForkOn<IHasForkOn<T>>;
 }
 
 // TODO: test
-interface IHasSplit<T> extends Iterable<T> {
-  forkMap<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): IHasSplit<{ [K in keyof M]: ReturnType<M[K]> }>;
-  forkMap<R1>(...splits: readonly [Unary<this, R1>]): IHasSplit<[R1]>
-  forkMap<R1, R2>(...splits: readonly [Unary<this, R1>, Unary<this, R2>]): IHasSplit<[R1, R2]>
-  forkMap<R1, R2, R3>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>]): IHasSplit<[R1, R2, R3]>
-  forkMap<R1, R2, R3, R4>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>]): IHasSplit<[R1, R2, R3, R4]>
-  forkMap<R1, R2, R3, R4, R5>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>]): IHasSplit<[R1, R2, R3, R4, R5]>
-  forkMap<R1, R2, R3, R4, R5, R6>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>]): IHasSplit<[R1, R2, R3, R4, R5, R6]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7, R8]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7, R8, R9]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>, Unary<this, R15>]): IHasSplit<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
-  forkMap<R>(...splits: readonly (Unary<this, R>)[]): IHasSplit<R[]>;
+export interface IHasForkFlat<T> extends Iterable<T> {
+  forkFlat<R>(...forks: readonly (Unary<this, Iterateable<R>>)[]): IHasForkFlat<R>;
 }
 
+// TODO: test
+export interface IHasForkMap<T> extends Iterable<T> {
+  forkMap<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): IHasForkMap<{ [K in keyof M]: ReturnType<M[K]> }>;
+  forkMap<R1>(...splits: readonly [Unary<this, R1>]): IHasForkMap<[R1]>
+  forkMap<R1, R2>(...splits: readonly [Unary<this, R1>, Unary<this, R2>]): IHasForkMap<[R1, R2]>
+  forkMap<R1, R2, R3>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>]): IHasForkMap<[R1, R2, R3]>
+  forkMap<R1, R2, R3, R4>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>]): IHasForkMap<[R1, R2, R3, R4]>
+  forkMap<R1, R2, R3, R4, R5>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>]): IHasForkMap<[R1, R2, R3, R4, R5]>
+  forkMap<R1, R2, R3, R4, R5, R6>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>]): IHasForkMap<[R1, R2, R3, R4, R5, R6]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>, Unary<this, R15>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
+  forkMap<R>(...splits: readonly (Unary<this, R>)[]): IHasForkMap<R[]>;
+}
 
 export interface ICollection<T> extends
   Iterable<T>
@@ -235,10 +245,14 @@ export interface ICollection<T> extends
   , IHasFilter<T>
   , IHasFind<T>
   , IHasFindIndex<T>
+  , IHasFirst<T>
   , IHasFlat<T>
   , IHasFlatMap<T>
   , IHasFlatSome<T>
   , IHasForEach<T>
+  , IHasForkFlat<T>
+  , IHasForkMap<T>
+  , IHasForkOn<T>
   , IHasGetSize<T>
   , IHasGt<T>
   , IHasGte<T>
@@ -247,6 +261,7 @@ export interface ICollection<T> extends
   , IHasLt<T>
   , IHasLte<T>
   , IHasMap<T>
+  , IHasMatching<T>
   , IHasNotMatching<T>
   , IHasNotNull<T>
   , IHasNotNullable<T>
@@ -271,8 +286,6 @@ export interface ICollection<T> extends
   , IHasUnshift<T>
   , IHasZipLong<T>
   , IHasZipShort<T>
-  , IHasFork<T>
-  , IHasSplit<T>
   {
 
   btw(left: Betweenable, right: Betweenable): ICollection<T>;
@@ -289,9 +302,9 @@ export interface ICollection<T> extends
   lte(value: Orderable): ICollection<T>;
   gt(value: Orderable): ICollection<T>;
   gte(value: Orderable): ICollection<T>;
-  map<U>(callbackfn: ((item: T, index: number) => U)): ICollection<U>;
-  matching(regexp: RegExp): ICollection<T>;
-  notMatching(regexp: RegExp): ICollection<T>;
+  map<U>(callbackfn: ((value: T, index: number) => U)): ICollection<U>;
+  matching(regexp: RegExp | string): ICollection<T>;
+  notMatching(regexp: RegExp | string): ICollection<T>;
   notNull(): ICollection<T extends null ? never : T>;
   notNullable(): ICollection<NonNullable<T>>;
   notUndefined(): ICollection<T extends undefined ? never : T>;
@@ -307,6 +320,7 @@ export interface ICollection<T> extends
   unshift(...unshifted: T[]): ICollection<T>;
   zipLong<U>(right: Iterateable<U>): ICollection<[Maybe<T>, Maybe<U>]>;
   zipShort<U>(right: Iterateable<U>): ICollection<[T, U]>;
+  forkOn<R>(callbackfn: ((value: T, index: number) => R)): ICollection<ICollection<T>>;
   forkFlat<R>(...forks: readonly (Unary<this, Iterateable<R>>)[]): ICollection<R>;
   forkMap<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): ICollection<{ [K in keyof M]: ReturnType<M[K]> }>;
   forkMap<R1>(...splits: readonly [Unary<this, R1>]): ICollection<[R1]>

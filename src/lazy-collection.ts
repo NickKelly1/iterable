@@ -1,9 +1,9 @@
+/* eslint-disable max-len */
 import { Maybe, None, Some } from '@nkp/maybe';
 import { smartSort, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
 import { Betweenable, Iterateable, Orderable, SortDirection, Unary } from './types';
 import { ICollection } from './collection.interface';
-
 
 /**
  * Lazy Collection
@@ -107,6 +107,30 @@ export class LazyCollection<T> implements ICollection<T> {
   }
 
   /**
+   * Fork into nested collections
+   * Inner collections are grouped by their return from the emit fn
+   *
+   * @param forks
+   */
+  forkOn<R>(callbackfn: ((value: T, index: number) => R)): LazyCollection<LazyCollection<T>> {
+    const self = this;
+    function * Iterateable(): IterableIterator<LazyCollection<T>> {
+      // need to collect all results to group them
+      const groups = new Map<R, T[]>();
+      const items = self._ensureCache();
+      items.forEach((item, i) => {
+        const identifier = callbackfn(item, i);
+        if (groups.has(identifier)) { groups.get(identifier)!.push(item); }
+        else { groups.set(identifier, [item,]); }
+      });
+      for (const group of groups.values()) {
+        yield new LazyCollection(group);
+      }
+    }
+    return new LazyCollection(Iterateable);
+  }
+
+  /**
    * Fork into separate collections which can be transformed separately
    * Combine and flatten into a resulting collection
    *
@@ -130,22 +154,22 @@ export class LazyCollection<T> implements ICollection<T> {
    * Similar to Promise.all
    */
   forkMap<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): LazyCollection<{ [K in keyof M]: ReturnType<M[K]> }>;
-  forkMap<R1>(...splits: readonly [Unary<this, R1>]): LazyCollection<[R1]>
-  forkMap<R1, R2>(...splits: readonly [Unary<this, R1>, Unary<this, R2>]): LazyCollection<[R1, R2]>
-  forkMap<R1, R2, R3>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>]): LazyCollection<[R1, R2, R3]>
-  forkMap<R1, R2, R3, R4>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>]): LazyCollection<[R1, R2, R3, R4]>
-  forkMap<R1, R2, R3, R4, R5>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>]): LazyCollection<[R1, R2, R3, R4, R5]>
-  forkMap<R1, R2, R3, R4, R5, R6>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>]): LazyCollection<[R1, R2, R3, R4, R5, R6]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>, Unary<this, R15>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
-  forkMap<R>(...splits: readonly (Unary<this, R>)[]): LazyCollection<R[]>
+  forkMap<R1>(...forks: readonly [Unary<this, R1>]): LazyCollection<[R1]>
+  forkMap<R1, R2>(...forks: readonly [Unary<this, R1>, Unary<this, R2>]): LazyCollection<[R1, R2]>
+  forkMap<R1, R2, R3>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>]): LazyCollection<[R1, R2, R3]>
+  forkMap<R1, R2, R3, R4>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>]): LazyCollection<[R1, R2, R3, R4]>
+  forkMap<R1, R2, R3, R4, R5>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>]): LazyCollection<[R1, R2, R3, R4, R5]>
+  forkMap<R1, R2, R3, R4, R5, R6>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>]): LazyCollection<[R1, R2, R3, R4, R5, R6]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>, Unary<this, R15>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
+  forkMap<R>(...forks: readonly (Unary<this, R>)[]): LazyCollection<R[]>
   forkMap(mapOrFunction?: (Unary<this, unknown> | Record<PropertyKey, Unary<this, unknown>>), ...rest: Unary<this, unknown>[]): $ANY {
     const self = this;
     if (mapOrFunction && !Array.isArray(mapOrFunction)) {
@@ -363,7 +387,7 @@ export class LazyCollection<T> implements ICollection<T> {
    * @returns
    */
   notNullable(): LazyCollection<NonNullable<T>> {
-    return this.filter(item => item != (null as $TODO<$ANY>)) as $TODO<$ANY>;
+    return this.filter(item => item != null) as $TODO<$ANY>;
   }
 
   /**

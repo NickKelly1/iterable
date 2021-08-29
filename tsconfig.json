@@ -15,15 +15,19 @@
     }
   },
   "compilerOptions": {
-    "target": "ES6",
+    "target": "es6",
     "module": "ESNext",
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": false,
     "sourceMap": true,
     "outDir": "dist",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
     "strict": true,
-    // "noEmit": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
@@ -33,5 +37,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-  }
+  },
+  "exclude": ["node_modules", "dist"],
 }

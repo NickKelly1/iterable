@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.25 - 2021-08-29
+
+### Added
+
+- Benchmarks
+
+### Changed
+
+- Speed improvement for `Collection.prototype.forEach`
+- Updated package.json links
+- Updated project configuration
+- Updated readme.md
+
 ## 0.0.24 - 2021-08-25
 
 ### Changed

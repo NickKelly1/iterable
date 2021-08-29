@@ -1,10 +1,9 @@
+/* eslint-disable max-len */
 import { Maybe, None, Some } from '@nkp/maybe';
 import { smartSort, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
 import { Iterateable, Orderable, Betweenable, Unary } from './types';
 import { ICollection } from './collection.interface';
-
-export interface ForkCollection<T, R> { (collection: Collection<T> ): R; }
 
 /**
  * Collection
@@ -27,7 +26,7 @@ export class Collection<T> implements ICollection<T> {
   constructor(iterateable: Iterateable<T>) {
     const iterable = toIterable(iterateable);
     if (Array.isArray(iterable)) this.items = iterable;
-    else if (iterateable instanceof Collection) this.items = iterateable._getArrayReference();
+    else if (iterateable instanceof Collection) this.items = iterateable.array();
     else this.items = Array.from(iterable);
   }
 
@@ -66,12 +65,30 @@ export class Collection<T> implements ICollection<T> {
    * @param callbackfn
    * @returns
    */
-  tap(callbackfn: (item: T, i: number) => unknown): this {
+  tap(callbackfn: ((value: T, i: number) => unknown)): this {
     const to = this.items.length;
     for (let i = 0; i < to; i += 1) {
       callbackfn(this.items[i]!, i);
     }
     return this;
+  }
+
+  /**
+   * Fork into nested collections
+   * Inner collections are grouped by their return from the emit fn
+   *
+   * @param forks
+   */
+  forkOn<R>(callbackfn: ((value: T, index: number) => R)): Collection<Collection<T>> {
+    const groups = new Map<R, T[]>();
+    this.items.forEach((item, i) => {
+      const identifier = callbackfn(item, i);
+      if (groups.has(identifier)) { groups.get(identifier)!.push(item); }
+      else { groups.set(identifier, [item,]); }
+    });
+    return new Collection(Array
+      .from(groups.values())
+      .map((group => new Collection(group))));
   }
 
   /**
@@ -142,11 +159,11 @@ export class Collection<T> implements ICollection<T> {
    *
    * @param callbackfn
    */
-  forEach(callbackfn: (item: T, i: number) => unknown): void {
-    const to = this.items.length;
-    for (let i = 0; i < to; i += 1) {
-      callbackfn(this.items[i]!, i);
-    }
+  forEach(callbackfn: (item: T, currentIndex: number, array: readonly T[]) => unknown): void {
+    // native "forEach" is faster than "for (let i)" on Node v14.17.4
+    this
+      .items
+      .forEach(callbackfn);
   }
 
   /**
@@ -535,7 +552,7 @@ export class Collection<T> implements ICollection<T> {
     const to = this.items.length;
     for (let i = 0; i < to; i += 1) {
       const item = this.items[i]!;
-      if (item != undefined) {
+      if (item != null) {
         collected.push(item as unknown as $TODO<$ANY>);
       }
     }
@@ -898,7 +915,7 @@ export class Collection<T> implements ICollection<T> {
    *
    * Useful for immutable utilities that so they can avoid cloning the array
    */
-  protected _getArrayReference(): T[] {
+  protected array(): T[] {
     return this.items;
   }
 
