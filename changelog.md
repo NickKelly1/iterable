@@ -5,6 +5,7 @@
 ### Changed
 
 - No longer bundling source maps
+- Updated dependencies
 
 ## 0.0.27 - 2021-08-29
 
