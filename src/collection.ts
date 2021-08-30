@@ -132,7 +132,11 @@ export class Collection<T> implements ICollection<T> {
   forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>, Unary<this, R15>]): Collection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
   forkMap<R>(...splits: readonly (Unary<this, R>)[]): Collection<R[]>
   forkMap(mapOrFunction?: (Unary<this, unknown> | Record<PropertyKey, Unary<this, unknown>>), ...rest: Unary<this, unknown>[]): $ANY {
-    if (mapOrFunction && !Array.isArray(mapOrFunction)) {
+
+    if (!mapOrFunction)
+      throw new TypeError('Collection.forkMap: you must provide an object or at least one function');
+
+    if (typeof mapOrFunction === 'object') {
       const mapping = mapOrFunction as Record<PropertyKey, Unary<this, unknown>>;
       const mappedResults: Record<PropertyKey, $ANY> = {};
       Object.keys(mapping).map(key => {
@@ -141,17 +145,11 @@ export class Collection<T> implements ICollection<T> {
       return new Collection([mapping,]);
     }
 
-    else if (mapOrFunction) {
-      const zeroFn = mapOrFunction as Unary<this, unknown>;
-      // given an array of functions
-      // given an array
-      const fns = [zeroFn, ...rest,] as Unary<this, unknown>[];
-      return new Collection([fns.map(split => split(this)),]);
-    }
-
-    // given nothing
-    return new Collection([]);
-
+    const zeroFn = mapOrFunction as Unary<this, unknown>;
+    // given an array of functions
+    // given an array
+    const fns = [zeroFn, ...rest,] as Unary<this, unknown>[];
+    return new Collection([fns.map(split => split(this)),]);
   }
 
   /**

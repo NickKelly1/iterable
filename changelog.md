@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.29 - 2021-08-29
+
+### Changed
+
+- Fixed a bug in `Collection.prototype.forkMap`
+- Fixed a bug in `LazyCollection.prototype.forkMap`
+
 ## 0.0.28 - 2021-08-29
 
 ### Changed

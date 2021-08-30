@@ -171,8 +171,12 @@ export class LazyCollection<T> implements ICollection<T> {
   forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...forks: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>, Unary<this, R15>]): LazyCollection<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
   forkMap<R>(...forks: readonly (Unary<this, R>)[]): LazyCollection<R[]>
   forkMap(mapOrFunction?: (Unary<this, unknown> | Record<PropertyKey, Unary<this, unknown>>), ...rest: Unary<this, unknown>[]): $ANY {
+
+    if (!mapOrFunction)
+      throw new TypeError('LazyCollection.forkMap: you must provide an object or at least one function');
+
     const self = this;
-    if (mapOrFunction && !Array.isArray(mapOrFunction)) {
+    if (typeof mapOrFunction === 'object') {
       const mapping = mapOrFunction as Record<PropertyKey, Unary<this, unknown>>;
       // given a map
       const iterateable = function * iterateable(): Iterable<Record<string, unknown>> {
@@ -185,20 +189,15 @@ export class LazyCollection<T> implements ICollection<T> {
       return new LazyCollection(iterateable);
     }
 
-    else if (mapOrFunction) {
-      const zeroFn = mapOrFunction as Unary<this, unknown>;
-      // given an array of functions
-      // given an array
-      const fns = [zeroFn, ...rest,] as Unary<this, unknown>[];
-      const iterateable = function * iterateable(): Iterable<unknown[]> {
-        const mapResults = fns.map((split) => split(self));
-        yield mapResults;
-      };
-      return new LazyCollection(iterateable);
-    }
-
-    // given nothing
-    return new LazyCollection([]);
+    const zeroFn = mapOrFunction as Unary<this, unknown>;
+    // given an array of functions
+    // given an array
+    const fns = [zeroFn, ...rest,] as Unary<this, unknown>[];
+    const iterateable = function * iterateable(): Iterable<unknown[]> {
+      const mapResults = fns.map((split) => split(self));
+      yield mapResults;
+    };
+    return new LazyCollection(iterateable);
   }
 
 
