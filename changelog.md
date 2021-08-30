@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.28 - 2021-08-29
+
+### Changed
+
+- No longer bundling source maps
+
 ## 0.0.27 - 2021-08-29
 
 ### Changed
