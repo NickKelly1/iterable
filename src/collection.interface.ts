@@ -53,6 +53,10 @@ export interface IHasFlatSome<T> extends Iterable<T> {
   flatSome(this: IHasFlatSome<None>): IHasFlatSome<never>;
 }
 
+export interface IHasFlatMapSome<T> extends Iterable<T> {
+  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): IHasFlatSome<U>;
+}
+
 export interface IHasForEach<T> extends Iterable<T> {
   forEach(callbackfn: ((value: T, index: number) => unknown)): void;
 }
@@ -95,6 +99,10 @@ export interface IHasPluck<T> extends Iterable<T> {
 
 export interface IHasMatch<T> extends Iterable<T> {
   match(regexp: string | RegExp): IHasMatch<Maybe<RegExpMatchArray>>;
+}
+
+export interface IHasMatchFlat<T> extends Iterable<T> {
+  matchFlat(regexp: string | RegExp): IHasMatch<RegExpMatchArray>;
 }
 
 export interface IHasMatching<T> extends Iterable<T> {
@@ -238,6 +246,7 @@ export interface ICollection<T> extends
   , IHasFirst<T>
   , IHasFlat<T>
   , IHasFlatMap<T>
+  , IHasFlatMapSome<T>
   , IHasFlatSome<T>
   , IHasForEach<T>
   , IHasForkFlat<T>
@@ -252,6 +261,7 @@ export interface ICollection<T> extends
   , IHasLte<T>
   , IHasMap<T>
   , IHasMatch<T>
+  , IHasMatchFlat<T>
   , IHasMatching<T>
   , IHasNotMatching<T>
   , IHasNotNull<T>
@@ -286,6 +296,7 @@ export interface ICollection<T> extends
   filter<U extends T>(callbackfn: ((value: T, currentIndex: number) => value is U)): ICollection<U>;
   filter(callbackfn: (value: T, currentIndex: number) => boolean): ICollection<T>;
   flat<U>(this: ICollection<Iterable<U>>): ICollection<U>;
+  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): ICollection<U>;
   flatMap<U>(callbackfn: (value: T, currentIndex: number) => Iterateable<U>): ICollection<U>;
   flatSome<U>(this: ICollection<Some<U>>): ICollection<U>;
   flatSome<U>(this: ICollection<Maybe<U>>): ICollection<U>;
@@ -296,6 +307,7 @@ export interface ICollection<T> extends
   gte(value: Orderable): ICollection<T>;
   map<U>(callbackfn: ((value: T, index: number) => U)): ICollection<U>;
   match(regexp: string | RegExp): ICollection<Maybe<RegExpMatchArray>>;
+  matchFlat(regexp: string | RegExp): ICollection<RegExpMatchArray>;
   matching(regexp: RegExp | string): ICollection<T>;
   notMatching(regexp: RegExp | string): ICollection<T>;
   notNull(): ICollection<T extends null ? never : T>;

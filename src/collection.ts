@@ -225,6 +225,23 @@ export class Collection<T> implements ICollection<T> {
   }
 
   /**
+   * Map the collection to Some and then filter and flatten to the containing value
+   *
+   * @param callbackfn
+   * @returns
+   */
+  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): Collection<U> {
+    const collected: U[] = [];
+    const to = this.items.length;
+    for (let i = 0; i < to; i += 1) {
+      const item = this.items[i]!;
+      const result = callbackfn(item, i);
+      if (result.isSome()) collected.push(result.value);
+    }
+    return new Collection(collected);
+  }
+
+  /**
    * Pick only the Some values
    */
   flatSome<U>(this: Collection<Some<U>>): Collection<U>
@@ -507,8 +524,6 @@ export class Collection<T> implements ICollection<T> {
   /**
    * Match items against the regex
    *
-   * Keep only matching items
-   *
    * @param regexp
    * @returns
    */
@@ -520,6 +535,25 @@ export class Collection<T> implements ICollection<T> {
       const result = String(item).match(regexp);
       if (result) collected.push(Maybe.some(result));
       else collected.push(Maybe.none);
+    }
+    return new Collection(collected);
+  }
+
+  /**
+   * Match items against the regex
+   *
+   * Keep only matching items
+   *
+   * @param regexp
+   * @returns
+   */
+  matchFlat(regexp: string | RegExp): Collection<RegExpMatchArray> {
+    const collected: RegExpMatchArray[] = [];
+    const to = this.items.length;
+    for (let i = 0; i < to; i += 1) {
+      const item = this.items[i]!;
+      const result = String(item).match(regexp);
+      if (result) collected.push(result);
     }
     return new Collection(collected);
   }

@@ -1,11 +1,27 @@
 # Changelog
 
+## 0.0.31 - 2021-08-31
+
+### Added
+
+- `Collection.prototype.flatMapSome`
+- `LazyCollection.prototype.flatMapSome`
+- `Collection.prototype.matchFlat`
+- `LazyCollection.prototype.matchFlat`
+- Added tests
+
+### Changed
+
+- Updated readme.md
+
 ## 0.0.30 - 2021-08-31
 
 ### Added
 
 - `Collection.prototype.pluck`
 - `Collection.prototype.match`
+- `LazyCollection.prototype.pluck`
+- `LazyCollection.prototype.match`
 - Added missing tests
 
 ### Changed

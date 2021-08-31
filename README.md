@@ -16,7 +16,7 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
   - [npm](#npm)
   - [yarn](#yarn)
   - [exports](#exports)
-- [Array Holes](#array-hols)
+- [Array Holes](#array-holes)
 - [Collection Types](#collection-types)
   - [Collection](#collection)
   - [LazyCollection](#lazy)
@@ -33,6 +33,7 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
     - [first](#first)
     - [flat](#flat)
     - [flatMap](#flatmap)
+    - [flatMapSome](#flatmapsome)
     - [flatSome](#flatsome)
     - [forEach](#forEach)
     - [forkFlat](#forkflat)
@@ -48,6 +49,7 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
     - [lte](#lte)
     - [map](#map)
     - [match](#match)
+    - [matchFlat](#matchflat)
     - [matching](#matching)
     - [notMatching](#notmatching)
     - [notNull](#notnull)
@@ -512,6 +514,33 @@ collection.flatMap(collect); // Collection [1, 2, 3]
 collection.map(collect).flat(); // Collection [1, 2, 3]
 ```
 
+#### flatMapSome
+
+Map into a `Maybe` and filter and flatten the value back into a collection.
+
+```ts
+// signature
+
+import { Maybe, } from '@nkp/iterable';
+
+interface IHasFlatMapSome<T> extends Iterable<T> {
+  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): IHasFlatSome<U>;
+}
+```
+
+```ts
+// usage
+
+import { Maybe } from '@nkp/maybe';
+import { collect } from '@nkp/iterable';
+
+const collection = collect([1, 3]);
+
+collection.flatMapSome(
+  (n) => n <= 1 ? Maybe.some(n) : Maybe.none);
+// Collection [1]
+```
+
 #### flatSome
 
 Flatten `Some` values and filter out `None`'s from the collection.
@@ -907,6 +936,8 @@ collection.map(n => n + 1); // Collection [1, 2, 3]
 
 Match items against the regex.
 
+Returns `Some` if the match succeded and `None` if not.
+
 ```ts
 // signature
 
@@ -942,6 +973,48 @@ collection.match(/\.(css|js)$/);
  *     input: 'style.css',
  *     groups: undefined,
  *   }]
+ * ]
+ */
+```
+
+#### matchFlat
+
+Match items against the regex.
+
+Only keeps successful matches.
+
+```ts
+// signature
+
+export interface IHasMatchFlat<T> extends Iterable<T> {
+  matchFlat(regexp: string | RegExp): IHasMatch<RegExpMatchArray>;
+}
+```
+
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+const collection = collect(['index.html', 'style.css', 'script.js']);
+
+collection.matchFlat(/\.(css|js)$/);
+/**
+ * Collection [
+ *   [RegExpMatchArray] {
+ *     0: '.css',
+ *     1: 'css',
+ *     index: 5,
+ *     input: 'style.css',
+ *     groups: undefined,
+ *   }
+ *   [RegExpMatchArray] {
+ *     0: '.js',
+ *     1: 'js',
+ *     index: 5,
+ *     input: 'style.css',
+ *     groups: undefined,
+ *   }
  * ]
  */
 ```

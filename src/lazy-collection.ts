@@ -279,6 +279,24 @@ export class LazyCollection<T> implements ICollection<T> {
     return new LazyCollection(iterable);
   }
 
+  /**
+   * Map the collection to Some and then filter and flatten to the containing value
+   *
+   * @param callbackfn
+   * @returns
+   */
+  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): LazyCollection<U> {
+    const self = this;
+    const iterable = function * (): Iterable<U> {
+      let i = 0;
+      for (const item of self) {
+        const next = callbackfn(item, i);
+        if (next.isSome()) yield next.value;
+        i += 1;
+      }
+    };
+    return new LazyCollection(iterable);
+  }
 
   /**
    * Pick only the Some values
@@ -438,6 +456,25 @@ export class LazyCollection<T> implements ICollection<T> {
         const result = String(item).match(regexp);
         if (result) yield Maybe.some(result);
         else yield Maybe.none;
+      }
+    }
+    return new LazyCollection(iterateable);
+  }
+
+  /**
+   * Match items against the regex
+   *
+   * Keep only matching items
+   *
+   * @param regexp
+   * @returns
+   */
+  matchFlat(regexp: string | RegExp): LazyCollection<RegExpMatchArray> {
+    const self = this;
+    function * iterateable(): Iterable<RegExpMatchArray> {
+      for (const item of self) {
+        const result = String(item).match(regexp);
+        if (result) yield result;
       }
     }
     return new LazyCollection(iterateable);
