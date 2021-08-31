@@ -53,8 +53,8 @@ export interface IHasFlatSome<T> extends Iterable<T> {
   flatSome(this: IHasFlatSome<None>): IHasFlatSome<never>;
 }
 
-export interface IHasFlatMapSome<T> extends Iterable<T> {
-  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): IHasFlatSome<U>;
+export interface IHasMapSome<T> extends Iterable<T> {
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): IHasFlatSome<U>;
 }
 
 export interface IHasForEach<T> extends Iterable<T> {
@@ -246,7 +246,7 @@ export interface ICollection<T> extends
   , IHasFirst<T>
   , IHasFlat<T>
   , IHasFlatMap<T>
-  , IHasFlatMapSome<T>
+  , IHasMapSome<T>
   , IHasFlatSome<T>
   , IHasForEach<T>
   , IHasForkFlat<T>
@@ -296,7 +296,7 @@ export interface ICollection<T> extends
   filter<U extends T>(callbackfn: ((value: T, currentIndex: number) => value is U)): ICollection<U>;
   filter(callbackfn: (value: T, currentIndex: number) => boolean): ICollection<T>;
   flat<U>(this: ICollection<Iterable<U>>): ICollection<U>;
-  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): ICollection<U>;
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): ICollection<U>;
   flatMap<U>(callbackfn: (value: T, currentIndex: number) => Iterateable<U>): ICollection<U>;
   flatSome<U>(this: ICollection<Some<U>>): ICollection<U>;
   flatSome<U>(this: ICollection<Maybe<U>>): ICollection<U>;

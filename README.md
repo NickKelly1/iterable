@@ -33,7 +33,6 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
     - [first](#first)
     - [flat](#flat)
     - [flatMap](#flatmap)
-    - [flatMapSome](#flatmapsome)
     - [flatSome](#flatsome)
     - [forEach](#forEach)
     - [forkFlat](#forkflat)
@@ -48,6 +47,7 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
     - [lt](#lt)
     - [lte](#lte)
     - [map](#map)
+    - [mapSome](#mapSome)
     - [match](#match)
     - [matchFlat](#matchflat)
     - [matching](#matching)
@@ -514,33 +514,6 @@ collection.flatMap(collect); // Collection [1, 2, 3]
 collection.map(collect).flat(); // Collection [1, 2, 3]
 ```
 
-#### flatMapSome
-
-Map into a `Maybe` and filter and flatten the value back into a collection.
-
-```ts
-// signature
-
-import { Maybe, } from '@nkp/iterable';
-
-interface IHasFlatMapSome<T> extends Iterable<T> {
-  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): IHasFlatSome<U>;
-}
-```
-
-```ts
-// usage
-
-import { Maybe } from '@nkp/maybe';
-import { collect } from '@nkp/iterable';
-
-const collection = collect([1, 3]);
-
-collection.flatMapSome(
-  (n) => n <= 1 ? Maybe.some(n) : Maybe.none);
-// Collection [1]
-```
-
 #### flatSome
 
 Flatten `Some` values and filter out `None`'s from the collection.
@@ -930,6 +903,33 @@ import { collect } from '@nkp/iterable';
 const collection = collect([1, 2, 3]);
 
 collection.map(n => n + 1); // Collection [1, 2, 3]
+```
+
+#### mapSome
+
+Map into a `Maybe` and filter and flatten the value back into a collection.
+
+```ts
+// signature
+
+import { Maybe, } from '@nkp/iterable';
+
+interface IHasMapSome<T> extends Iterable<T> {
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): IHasMapSome<U>;
+}
+```
+
+```ts
+// usage
+
+import { Maybe } from '@nkp/maybe';
+import { collect } from '@nkp/iterable';
+
+const collection = collect([1, 3]);
+
+collection.mapSome(
+  (n) => n <= 1 ? Maybe.some(n) : Maybe.none);
+// Collection [1]
 ```
 
 #### match

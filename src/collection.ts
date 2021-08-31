@@ -230,7 +230,7 @@ export class Collection<T> implements ICollection<T> {
    * @param callbackfn
    * @returns
    */
-  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): Collection<U> {
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): Collection<U> {
     const collected: U[] = [];
     const to = this.items.length;
     for (let i = 0; i < to; i += 1) {

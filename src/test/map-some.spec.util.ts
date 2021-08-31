@@ -1,9 +1,9 @@
 import { Maybe } from '@nkp/maybe';
-import { IHasFlatMapSome } from '../collection.interface';
+import { IHasMapSome } from '../collection.interface';
 import { Iterateable } from '../types';
 
-export function testFlatMapSome(create: <T>(iterable: Iterateable<T>) => IHasFlatMapSome<T>): void {
-  describe('flatMapSome(...)', () => {
+export function testMapSome(create: <T>(iterable: Iterateable<T>) => IHasMapSome<T>): void {
+  describe('mapSome(...)', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = create<Maybe<number>>([
@@ -12,7 +12,7 @@ export function testFlatMapSome(create: <T>(iterable: Iterateable<T>) => IHasFla
           Maybe.some(3),
         ]);
         const called: number[] = Array.from(pipeline
-          .flatMapSome((maybe) => maybe.map(n => n + 1))
+          .mapSome((maybe) => maybe.map(n => n + 1))
         );
         expect(called).toEqual([2, 4,]);
       });
@@ -23,7 +23,7 @@ export function testFlatMapSome(create: <T>(iterable: Iterateable<T>) => IHasFla
           Maybe.some(3),
         ]));
         const called: number[] = Array.from(pipeline
-          .flatMapSome((maybe) => maybe.map(n => n + 1))
+          .mapSome((maybe) => maybe.map(n => n + 1))
         );
         expect(called).toEqual([2, 4,]);
       });
@@ -35,7 +35,7 @@ export function testFlatMapSome(create: <T>(iterable: Iterateable<T>) => IHasFla
         ]);
         const pipeline = create(() => map.values());
         const called: number[] = Array.from(pipeline
-          .flatMapSome((maybe) => maybe.map(n => n + 1))
+          .mapSome((maybe) => maybe.map(n => n + 1))
         );
         expect(called).toEqual([2, 4,]);
       });
@@ -44,7 +44,7 @@ export function testFlatMapSome(create: <T>(iterable: Iterateable<T>) => IHasFla
           yield Maybe.some(1); yield Maybe.none; yield Maybe.some(3);
         });
         const called: number[] = Array.from(pipeline
-          .flatMapSome((maybe) => maybe.map(n => n + 1))
+          .mapSome((maybe) => maybe.map(n => n + 1))
         );
         expect(called).toEqual([2, 4,]);
       });

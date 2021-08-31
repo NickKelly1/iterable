@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.0.32 - 2021-08-31
+
+### Changed
+
+- Renamed `flatMapSome` to `mapSome`
+
+
 ## 0.0.31 - 2021-08-31
 
 ### Added

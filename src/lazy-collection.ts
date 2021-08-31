@@ -285,7 +285,7 @@ export class LazyCollection<T> implements ICollection<T> {
    * @param callbackfn
    * @returns
    */
-  flatMapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): LazyCollection<U> {
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): LazyCollection<U> {
     const self = this;
     const iterable = function * (): Iterable<U> {
       let i = 0;

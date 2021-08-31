@@ -8,7 +8,7 @@ import { testFilter } from './test/filter.spec.util';
 import { testFindIndex } from './test/find-index.spec.util';
 import { testFind } from './test/find.spec.util';
 import { testFirst } from './test/first.spec.util';
-import { testFlatMapSome } from './test/flat-map-some.spec.util';
+import { testMapSome } from './test/map-some.spec.util';
 import { testFlatMap } from './test/flat-map.spec.util';
 import { testFlatSome } from './test/flat-some.spec.util';
 import { testFlat } from './test/flat.spec.util';
@@ -78,7 +78,7 @@ describe('Collection', () => {
   testFirst(create);
   testFlat(create);
   testFlatMap(create);
-  testFlatMapSome(create);
+  testMapSome(create);
   testFlatSome(create);
   testForEach(create);
   testForkFlat(create);
