@@ -5,24 +5,24 @@ export function testNotMatching(create: <T>(iterable: Iterateable<T>) => IHasNot
   describe('notMatching(...)', () => {
     describe('should work on', () => {
       it('array', () => {
-        const pipeline = create([
+        const collection = create([
           'index.html',
           'style.css',
           'script.js',
         ]);
-        const called: string[] = Array.from(pipeline
+        const called: string[] = Array.from(collection
           .notMatching(/\.css$/)
         );
         expect(called[0]).toEqual('index.html');
         expect(called[1]).toEqual('script.js');
       });
       it('set', () => {
-        const pipeline = create(new Set([
+        const collection = create(new Set([
           'index.html',
           'style.css',
           'script.js',
         ]));
-        const called: string[] = Array.from(pipeline
+        const called: string[] = Array.from(collection
           .notMatching(/\.css$/)
         );
         expect(called[0]).toEqual('index.html');
@@ -42,12 +42,12 @@ export function testNotMatching(create: <T>(iterable: Iterateable<T>) => IHasNot
         expect(called[1]).toEqual('script.js');
       });
       it('generator', () => {
-        const pipeline = create(function * () {
+        const collection = create(function * () {
           yield 'index.html';
           yield 'style.css';
           yield 'script.js';
         });
-        const called: string[] = Array.from(pipeline
+        const called: string[] = Array.from(collection
           .notMatching(/\.css$/)
         );
         expect(called[0]).toEqual('index.html');

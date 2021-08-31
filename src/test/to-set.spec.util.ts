@@ -1,7 +1,7 @@
 import { IHasToSet } from '../collection.interface';
 import { Iterateable } from '../types';
 
-export function testSet(create: <T>(iterable: Iterateable<T>) => IHasToSet<T>): void {
+export function testToSet(create: <T>(iterable: Iterateable<T>) => IHasToSet<T>): void {
   describe('toSet(...)', () => {
     describe('should work on', () => {
       it('array', () => {

@@ -1,7 +1,7 @@
 import { IHasToArray } from '../collection.interface';
 import { Iterateable } from '../types';
 
-export function testArray(create: <T>(iterable: Iterateable<T>) => IHasToArray<T>): void {
+export function testToArray(create: <T>(iterable: Iterateable<T>) => IHasToArray<T>): void {
   describe('toArray(...)', () => {
     describe('should work on', () => {
       it('array', () => {

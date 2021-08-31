@@ -1,13 +1,13 @@
-import { IHasUnshift } from '../collection.interface';
+import { IHasPrecat } from '../collection.interface';
 import { Iterateable } from '../types';
 
-export function testUnshift(create: <T>(iterable: Iterateable<T>) => IHasUnshift<T>): void {
-  describe('unshift(...)', () => {
+export function testPrecat(create: <T>(iterable: Iterateable<T>) => IHasPrecat<T>): void {
+  describe('precat(...)', () => {
     describe('should work on', () => {
       it('array', () => {
         const pipeline = create([1, 2, 3,]);
         const called: number[] = Array.from(pipeline
-          .unshift(4, 5)
+          .precat([4, 5,])
         );
         expect(called[0]).toEqual(4);
         expect(called[1]).toEqual(5);
@@ -15,7 +15,7 @@ export function testUnshift(create: <T>(iterable: Iterateable<T>) => IHasUnshift
       it('set', () => {
         const pipeline = create(new Set([1, 2, 3,]));
         const called: number[] = Array.from(pipeline
-          .unshift(4, 5)
+          .precat([4, 5,])
         );
         expect(called[0]).toEqual(4);
         expect(called[1]).toEqual(5);
@@ -24,7 +24,7 @@ export function testUnshift(create: <T>(iterable: Iterateable<T>) => IHasUnshift
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
         const pipeline = create(map);
         const called: [number, number][] = Array.from(pipeline
-          .unshift([4, 4,], [5, 5,])
+          .precat([[4, 4,], [5, 5,],])
         );
         expect(called[0]).toEqual([4, 4,]);
         expect(called[1]).toEqual([5, 5,]);
@@ -37,7 +37,7 @@ export function testUnshift(create: <T>(iterable: Iterateable<T>) => IHasUnshift
         };
         const pipeline = create(generator);
         const called: number[] = Array.from(pipeline
-          .unshift(4, 5)
+          .precat([4, 5,])
         );
         expect(called[0]).toEqual(4);
         expect(called[1]).toEqual(5);

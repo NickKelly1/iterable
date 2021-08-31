@@ -47,12 +47,14 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
     - [lt](#lt)
     - [lte](#lte)
     - [map](#map)
+    - [match](#match)
     - [matching](#matching)
     - [notMatching](#notmatching)
     - [notNull](#notnull)
     - [notNullable](#notnullable)
     - [notUndefined](#notundefined)
     - [pick](#pick)
+    - [pluck](#pluck)
     - [precat](#precat)
     - [push](#push)
     - [reduce](#reduce)
@@ -901,6 +903,49 @@ const collection = collect([1, 2, 3]);
 collection.map(n => n + 1); // Collection [1, 2, 3]
 ```
 
+#### match
+
+Match items against the regex.
+
+```ts
+// signature
+
+import { Maybe } from '@nkp-maybe';
+
+interface IHasMatch<T> extends IHasForEach<T> {
+  match(regexp: string | RegExp): IHasMatch<Maybe<RegExpMatchArray>>;
+}
+```
+
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+const collection = collect(['index.html', 'style.css', 'script.js']);
+
+collection.match(/\.(css|js)$/);
+/**
+ * Collection [
+ *   None
+ *   Some [[RegExpMatchArray] {
+ *     0: '.css',
+ *     1: 'css',
+ *     index: 5,
+ *     input: 'style.css',
+ *     groups: undefined,
+ *   }]
+ *   Some [[RegExpMatchArray] {
+ *     0: '.js',
+ *     1: 'js',
+ *     index: 5,
+ *     input: 'style.css',
+ *     groups: undefined,
+ *   }]
+ * ]
+ */
+```
+
 #### matching
 
 Keeps values matching the given regex.
@@ -1031,6 +1076,32 @@ import { collect } from '@nkp/iterable';
 const collection = collect([1, 2, 3]);
 
 collection.pick(1, 2); // Collection [1, 2]
+```
+
+#### pluck
+
+Pluck the key from each value in the collection.
+
+```ts
+// signature
+
+interface IHasPluck<T> extends IHasForEach<T> {
+  pluck<K extends keyof T>(key: K): IHasPluck<T[K]>;
+}
+```
+
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+const collection = collection([
+  { prop: 'a' },
+  { prop: 'b' },
+  { prop: 'c' },
+]);
+
+collection.pluck('prop'); // Collection ['a', 'b', 'c']
 ```
 
 #### precat

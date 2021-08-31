@@ -2,12 +2,10 @@
 import { Maybe, None, Some } from '@nkp/maybe';
 import { Betweenable, Iterateable, Orderable, SortDirection, Unary } from './types';
 
-// TODO: test
 export interface IHasAt<T> extends Iterable<T> {
   at(index: number): Maybe<T>;
 }
 
-// TODO: test
 export interface IHasBtw<T> extends Iterable<T> {
   btw(left: Betweenable, right: Betweenable): IHasBtw<T>;
 }
@@ -29,17 +27,14 @@ export interface IHasFilter<T> extends Iterable<T> {
   filter(callbackfn: (value: T, currentIndex: number) => boolean): IHasFilter<T>;
 }
 
-// TODO: test
 export interface IHasFind<T> extends Iterable<T> {
   find(callbackfn: (value: T, currentIndex: number) => boolean): Maybe<T>;
 }
 
-// TODO: test
 export interface IHasFindIndex<T> extends Iterable<T> {
   findIndex(callbackfn: (value: T, currentIndex: number) => boolean): Maybe<number>;
 }
 
-// TODO: test
 export interface IHasFirst<T> extends Iterable<T> {
   first(): Maybe<T>;
 }
@@ -62,22 +57,18 @@ export interface IHasForEach<T> extends Iterable<T> {
   forEach(callbackfn: ((value: T, index: number) => unknown)): void;
 }
 
-// TODO: test
 export interface IHasGetSize<T> extends Iterable<T> {
   getSize(): number;
 }
 
-// TODO: test
 export interface IHasGt<T> extends Iterable<T> {
   gt(value: Orderable): IHasGt<T>;
 }
 
-// TODO: test
 export interface IHasGte<T> extends Iterable<T> {
   gte(value: Orderable): IHasGte<T>;
 }
 
-// TODO: test
 export interface IHasIndexOf<T> extends Iterable<T> {
   indexOf(value: T): Maybe<number>;
 }
@@ -86,12 +77,10 @@ export interface IHasJoin<T> extends Iterable<T> {
   join(separator?: string): string;
 }
 
-// TODO: test
 export interface IHasLt<T> extends Iterable<T> {
   lt(value: Orderable): IHasLt<T>;
 }
 
-// TODO: test
 export interface IHasLte<T> extends Iterable<T> {
   lte(value: Orderable): IHasLte<T>;
 }
@@ -100,7 +89,15 @@ export interface IHasMap<T> extends Iterable<T> {
   map<U>(callbackfn: ((value: T, index: number) => U)): IHasMap<U>;
 }
 
-export interface IHasMatching<T> extends IHasForEach<T> {
+export interface IHasPluck<T> extends Iterable<T> {
+  pluck<K extends keyof T>(key: K): IHasPluck<T[K]>;
+}
+
+export interface IHasMatch<T> extends Iterable<T> {
+  match(regexp: string | RegExp): IHasMatch<Maybe<RegExpMatchArray>>;
+}
+
+export interface IHasMatching<T> extends Iterable<T> {
   matching(regexp: RegExp | string): IHasMatching<T>;
 }
 
@@ -124,7 +121,6 @@ export interface IHasPick<T> extends Iterable<T> {
   pick(...keep: T[]): IHasPick<T>;
 }
 
-// TODO: test
 export interface IHasPrecat<T> extends Iterable<T> {
   precat(precat: Iterateable<T>): IHasPrecat<T>;
 }
@@ -165,12 +161,10 @@ export interface IHasTake<T> extends Iterable<T> {
   take(count?: number): IHasTake<T>;
 }
 
-// TODO: test
 export interface IHasTap<T> extends Iterable<T> {
   tap(callbackfn: ((value: T, index: number) => unknown)): this;
 }
 
-// TODO: test
 export interface IHasTapSelf<T> extends Iterable<T> {
   tapSelf(callbackfn: ((self: IHasTapSelf<T>) => unknown)): this;
 }
@@ -179,7 +173,6 @@ export interface IHasToArray<T> extends Iterable<T> {
   toArray(): Array<T>
 }
 
-// TODO: test
 export interface IHasToMap<T> extends Iterable<T> {
   toMap<K, V>(this: IHasToMap<[K, V]>): Map<K, V>;
 }
@@ -204,17 +197,14 @@ export interface IHasZipShort<T> extends Iterable<T> {
   zipShort<U>(right: Iterateable<U>): IHasZipShort<[T, U]>;
 }
 
-// TODO: test
 export interface IHasForkOn<T> extends Iterable<T> {
   forkOn<R>(callbackfn: ((value: T, index: number) => R)): IHasForkOn<IHasForkOn<T>>;
 }
 
-// TODO: test
 export interface IHasForkFlat<T> extends Iterable<T> {
   forkFlat<R>(...forks: readonly (Unary<this, Iterateable<R>>)[]): IHasForkFlat<R>;
 }
 
-// TODO: test
 export interface IHasForkMap<T> extends Iterable<T> {
   forkMap<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): IHasForkMap<{ [K in keyof M]: ReturnType<M[K]> }>;
   forkMap<R1>(...splits: readonly [Unary<this, R1>]): IHasForkMap<[R1]>
@@ -261,12 +251,14 @@ export interface ICollection<T> extends
   , IHasLt<T>
   , IHasLte<T>
   , IHasMap<T>
+  , IHasMatch<T>
   , IHasMatching<T>
   , IHasNotMatching<T>
   , IHasNotNull<T>
   , IHasNotNullable<T>
   , IHasNotUndefined<T>
   , IHasPick<T>
+  , IHasPluck<T>
   , IHasPrecat<T>
   , IHasPush<T>
   , IHasReduce<T>
@@ -303,12 +295,14 @@ export interface ICollection<T> extends
   gt(value: Orderable): ICollection<T>;
   gte(value: Orderable): ICollection<T>;
   map<U>(callbackfn: ((value: T, index: number) => U)): ICollection<U>;
+  match(regexp: string | RegExp): ICollection<Maybe<RegExpMatchArray>>;
   matching(regexp: RegExp | string): ICollection<T>;
   notMatching(regexp: RegExp | string): ICollection<T>;
   notNull(): ICollection<T extends null ? never : T>;
   notNullable(): ICollection<NonNullable<T>>;
   notUndefined(): ICollection<T extends undefined ? never : T>;
   pick(...keep: T[]): ICollection<T>;
+  pluck<K extends keyof T>(key: K): ICollection<T[K]>;
   precat(precat: Iterateable<T>): ICollection<T>;
   push(...pushed: T[]): ICollection<T>;
   reverse(): ICollection<T>;

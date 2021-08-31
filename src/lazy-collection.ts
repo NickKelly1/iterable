@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { Maybe, None, Some } from '@nkp/maybe';
-import { smartSort, toIterable } from './utils';
+import { smartSort, toBetweenable, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
 import { Betweenable, Iterateable, Orderable, SortDirection, Unary } from './types';
 import { ICollection } from './collection.interface';
@@ -355,8 +355,11 @@ export class LazyCollection<T> implements ICollection<T> {
    * @param regex
    * @returns
    */
-  notMatching(regex: RegExp): LazyCollection<T> {
-    return this.filter(item => !regex.test(String(item)));
+  notMatching(regexp: RegExp | string): LazyCollection<T> {
+    const _regex = typeof regexp === 'string'
+      ? new RegExp(regexp)
+      : regexp;
+    return this.filter(item => !_regex.test(String(item)));
   }
 
   /**
@@ -406,14 +409,53 @@ export class LazyCollection<T> implements ICollection<T> {
   }
 
   /**
+   * Pluck the key from the values
+   *
+   * @param value
+   */
+  pluck<K extends keyof T>(key: K): LazyCollection<T[K]> {
+    const self = this;
+    function * iterateable(): Iterable<T[K]> {
+      for (const item of self) {
+        yield item[key]!;
+      }
+    }
+    return new LazyCollection(iterateable);
+  }
+
+  /**
+   * Match items against the regex
+   *
+   * Keep only matching items
+   *
+   * @param regexp
+   * @returns
+   */
+  match(regexp: string | RegExp): LazyCollection<Maybe<RegExpMatchArray>> {
+    const self = this;
+    function * iterateable(): Iterable<Maybe<RegExpMatchArray>> {
+      for (const item of self) {
+        const result = String(item).match(regexp);
+        if (result) yield Maybe.some(result);
+        else yield Maybe.none;
+      }
+    }
+    return new LazyCollection(iterateable);
+  }
+
+
+  /**
    * Pick items that test positive
    *
    * @param this
    * @param regex
    * @returns
    */
-  matching(regex: RegExp): LazyCollection<T> {
-    return this.filter(item => regex.test(String(item)));
+  matching(regexp:  RegExp | string): LazyCollection<T> {
+    const _regex = typeof regexp === 'string'
+      ? new RegExp(regexp)
+      : regexp;
+    return this.filter(item => _regex.test(String(item)));
   }
 
   /**
@@ -849,50 +891,18 @@ export class LazyCollection<T> implements ICollection<T> {
    * @returns
    */
   btw(left: Betweenable, right: Betweenable): LazyCollection<T> {
-    let li = true;
-    let lv: number;
-    if (typeof left === 'number')  lv = left;
-    else if (left instanceof Date) lv = left.valueOf();
-    else if (Array.isArray(left)) {
-      const leftValue = left[0]!;
-      if (typeof leftValue === 'number')  lv = leftValue;
-      else if (leftValue instanceof Date) lv = leftValue.valueOf();
-      li = left[1] ?? true;
-    }
-    else {
-      const leftValue = left.value!;
-      if (typeof leftValue === 'number')  lv = leftValue;
-      else if (leftValue instanceof Date) lv = leftValue.valueOf();
-      li = left.inclusive ?? true;
-    }
-
-    let ri = true;
-    let rv: number;
-    if (typeof right === 'number')  rv = right;
-    else if (right instanceof Date) rv = right.valueOf();
-    else if (Array.isArray(right)) {
-      const rightValue = right[0]!;
-      if (typeof rightValue === 'number')  rv = rightValue;
-      else if (rightValue instanceof Date) rv = rightValue.valueOf();
-      ri = right[1] ?? true;
-    }
-    else {
-      const rightValue = right.value!;
-      if (typeof rightValue === 'number')  rv = rightValue;
-      else if (rightValue instanceof Date) rv = rightValue.valueOf();
-      ri = right.inclusive ?? true;
-    }
+    const _left = toBetweenable(left);
+    const _right = toBetweenable(right);
 
     return this.filter(item => {
       const number = Number(item);
       if (Number.isNaN(item)) return false;
-      if (
-        (li ? number >= lv : number > lv)
-        && (ri ? number <= rv : number < rv)
-      ) {
-        return true;
-      }
-      return true;
+      return ((_left.inclusive
+        ? number >= _left.value
+        : number > _left.value)
+      && (_right.inclusive
+        ? number <= _right.value
+        : number <_right.value));
     });
   }
 
@@ -919,7 +929,7 @@ export class LazyCollection<T> implements ICollection<T> {
     }
 
     if (-index > arr.length) return Maybe.none;
-    return Maybe.some(arr[arr.length - index]!);
+    return Maybe.some(arr[arr.length + index]!);
   }
 
   /**

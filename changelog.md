@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.30 - 2021-08-31
+
+### Added
+
+- `Collection.prototype.pluck`
+- `Collection.prototype.match`
+- Added missing tests
+
+### Changed
+
+- Updated dependencies
+- Updated readme.md
+
 ## 0.0.29 - 2021-08-29
 
 ### Changed

@@ -20,10 +20,12 @@ export type Iterateable<T> =
 ;
 
 export type Orderable = number | Date;
+export type BetweenableArray = [ value: Orderable, inclusive?: boolean ];
+export type BetweenableObject = { value: Orderable; inclusive?: boolean; };
 export type Betweenable =
   | Orderable
-  | [ value: Orderable, inclusive?: boolean ]
-  | { value: Orderable; inclusive?: boolean; }
+  | BetweenableArray
+  | BetweenableObject
 ;
 
 export type SortDirection<T> =

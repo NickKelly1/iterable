@@ -5,28 +5,26 @@ export function testMatching(create: <T>(iterable: Iterateable<T>) => IHasMatchi
   describe('matching(...)', () => {
     describe('should work on', () => {
       it('array', () => {
-        const pipeline = create([
+        const collection = create([
           'index.html',
           'style.css',
           'script.js',
         ]);
-        const called: string[] = [];
-        pipeline
+        const called: string[] = Array.from(collection
           .matching(/\.(html|js)$/)
-          .forEach(item => called.push(item));
+        );
         expect(called[0]).toEqual('index.html');
         expect(called[1]).toEqual('script.js');
       });
       it('set', () => {
-        const pipeline = create(new Set([
+        const collection = create(new Set([
           'index.html',
           'style.css',
           'script.js',
         ]));
-        const called: string[] = [];
-        pipeline
+        const called: string[] = Array.from( collection
           .matching(/\.(html|js)$/)
-          .forEach(item => called.push(item));
+        );
         expect(called[0]).toEqual('index.html');
         expect(called[1]).toEqual('script.js');
       });
@@ -36,24 +34,22 @@ export function testMatching(create: <T>(iterable: Iterateable<T>) => IHasMatchi
           [2, 'style.css',],
           [3, 'script.js',],
         ]);
-        const pipeline = create(() => map.values());
-        const called: string[] = [];
-        pipeline
+        const collection = create(() => map.values());
+        const called: string[] = Array.from( collection
           .matching(/\.(html|js)$/)
-          .forEach(item => called.push(item));
+        );
         expect(called[0]).toEqual('index.html');
         expect(called[1]).toEqual('script.js');
       });
       it('generator', () => {
-        const pipeline = create(function * () {
+        const collection = create(function * () {
           yield 'index.html';
           yield 'style.css';
           yield 'script.js';
         });
-        const called: string[] = [];
-        pipeline
+        const called: string[] = Array.from( collection
           .matching(/\.(html|js)$/)
-          .forEach(item => called.push(item));
+        );
         expect(called[0]).toEqual('index.html');
         expect(called[1]).toEqual('script.js');
       });

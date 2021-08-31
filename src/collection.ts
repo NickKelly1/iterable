@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import { Maybe, None, Some } from '@nkp/maybe';
-import { smartSort, toIterable } from './utils';
+import { smartSort, toBetweenable, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
-import { Iterateable, Orderable, Betweenable, Unary } from './types';
+import { Iterateable, Orderable, Betweenable, Unary, BetweenableObject } from './types';
 import { ICollection } from './collection.interface';
 
 /**
@@ -224,7 +224,6 @@ export class Collection<T> implements ICollection<T> {
     return new Collection(collected);
   }
 
-
   /**
    * Pick only the Some values
    */
@@ -344,110 +343,23 @@ export class Collection<T> implements ICollection<T> {
   btw(left: Betweenable, right: Betweenable): Collection<T> {
     const collected: T[] = [];
     const to = this.items.length;
+    const _left: Required<BetweenableObject> = toBetweenable(left);
+    const _right: Required<BetweenableObject> = toBetweenable(right);
 
-    let li = true;
-    let lv: number;
-    if (typeof left === 'number')  lv = left;
-    else if (left instanceof Date) lv = left.valueOf();
-    else if (Array.isArray(left)) {
-      const leftValue = left[0]!;
-      if (typeof leftValue === 'number')  lv = leftValue;
-      else if (leftValue instanceof Date) lv = leftValue.valueOf();
-      li = left[1] ?? true;
-    }
-    else {
-      const leftValue = left.value!;
-      if (typeof leftValue === 'number')  lv = leftValue;
-      else if (leftValue instanceof Date) lv = leftValue.valueOf();
-      li = left.inclusive ?? true;
-    }
+    const isBtw = (number: number) => (
+      (_left.inclusive
+        ? number >= _left.value
+        : number > _left.value)
+      && (_right.inclusive
+        ? number <= _right.value
+        : number <_right.value));
 
-    let ri = true;
-    let rv: number;
-    if (typeof right === 'number')  rv = right;
-    else if (right instanceof Date) rv = right.valueOf();
-    else if (Array.isArray(right)) {
-      const rightValue = right[0]!;
-      if (typeof rightValue === 'number')  rv = rightValue;
-      else if (rightValue instanceof Date) rv = rightValue.valueOf();
-      ri = right[1] ?? true;
-    }
-    else {
-      const rightValue = right.value!;
-      if (typeof rightValue === 'number')  rv = rightValue;
-      else if (rightValue instanceof Date) rv = rightValue.valueOf();
-      ri = right.inclusive ?? true;
-    }
-
-    // we try to avoid excessive branching inside function calls to keep
-    // everything fast
-    // that's why the same loop is repeated nearly 4 times
-    //
-    // some other popular libraries like Webpack achieve this by compiling
-    // code using new Function(...)
-    // but this use-case is simple enough that we can avoid it
-
-    switch (li) {
-    case true:
-      switch (ri) {
-      case true:
-        // [left, right]
-        for (let i = 0; i < to; i += 1) {
-          const item = this.items[i]!;
-          const number = Number(item);
-          if (!Number.isNaN(number)
-            && number >= lv!
-            && number <= rv!
-          ) {
-            collected.push(item);
-          }
-        }
-        break;
-      case false:
-        // [left, right)
-        for (let i = 0; i < to; i += 1) {
-          const item = this.items[i]!;
-          const number = Number(item);
-          if (!Number.isNaN(number)
-            && number >= lv!
-            && number < rv!
-          ) {
-            collected.push(item);
-          }
-        }
-        break;
+    for (let i = 0; i < to; i += 1) {
+      const item = this.items[i]!;
+      const number = Number(item);
+      if (!Number.isNaN(number) && isBtw(number)) {
+        collected.push(item);
       }
-      break;
-    case false:
-      switch (ri) {
-      case true:
-        // (left, right]
-        for (let i = 0; i < to; i += 1) {
-          const item = this.items[i]!;
-          const number = Number(item);
-          if (!Number.isNaN(number)
-            && number > lv!
-            && number <= rv!
-          ) {
-            collected.push(item);
-          }
-        }
-        break;
-      case false:
-        // (left, right)
-        for (let i = 0; i < to; i += 1) {
-          const item = this.items[i]!;
-          const number = Number(item);
-          if (!Number.isNaN(number)
-            && number > lv!
-            && number < rv!
-          ) {
-            collected.push(item);
-          }
-        }
-        break;
-      }
-      break;
     }
 
     return new Collection(collected);
@@ -496,9 +408,14 @@ export class Collection<T> implements ICollection<T> {
   notMatching(regexp: RegExp): Collection<T> {
     const collected: T[] = [];
     const to = this.items.length;
+    const _regex = typeof regexp === 'string'
+      ? new RegExp(regexp)
+      : regexp;
     for (let i = 0; i < to; i += 1) {
       const item = this.items[i]!;
-      if (!regexp.test(String(item))) collected.push(item);
+      if (!_regex.test(String(item))) {
+        collected.push(item);
+      }
     }
     return new Collection(collected);
   }
@@ -576,17 +493,52 @@ export class Collection<T> implements ICollection<T> {
   }
 
   /**
+   * Pluck the key from the values
+   *
+   * @param value
+   */
+  pluck<K extends keyof T>(key: K): Collection<T[K]> {
+    return new Collection(Array.from(
+      { length: this.items.length, },
+      (_, i) => this.items[i]![key] ),
+    );
+  }
+
+  /**
+   * Match items against the regex
+   *
+   * Keep only matching items
+   *
+   * @param regexp
+   * @returns
+   */
+  match(regexp: string | RegExp): Collection<Maybe<RegExpMatchArray>> {
+    const collected: Maybe<RegExpMatchArray>[] = [];
+    const to = this.items.length;
+    for (let i = 0; i < to; i += 1) {
+      const item = this.items[i]!;
+      const result = String(item).match(regexp);
+      if (result) collected.push(Maybe.some(result));
+      else collected.push(Maybe.none);
+    }
+    return new Collection(collected);
+  }
+
+  /**
    * Pick items that test positive
    *
    * @param regexp
    * @returns
    */
-  matching(regexp: RegExp): Collection<T> {
+  matching(regexp: RegExp | string): Collection<T> {
     const collected: NonNullable<T>[] = [];
     const to = this.items.length;
+    const _regex = typeof regexp === 'string'
+      ? new RegExp(regexp)
+      : regexp;
     for (let i = 0; i < to; i += 1) {
       const item = this.items[i]!;
-      if (regexp.test(String(item))) {
+      if (_regex.test(String(item))) {
         collected.push(item);
       }
     }
@@ -878,7 +830,7 @@ export class Collection<T> implements ICollection<T> {
   indexOf(value: T): Maybe<number> {
     const to = this.items.length;
     for (let i = 0; i < to; i += 1) {
-      if (this.items[i]! === value ) {
+      if (this.items[i]! === value) {
         return Maybe.some(i);
       }
     }
@@ -905,7 +857,7 @@ export class Collection<T> implements ICollection<T> {
     }
     if (-index > items.length) return Maybe.none;
 
-    return Maybe.some(items[items.length - index]!);
+    return Maybe.some(items[items.length + index]!);
   }
 
   /**
