@@ -5,6 +5,8 @@
 ### Added
 
 - e2e testing
+- Updated dependencies
+- Fix potential version typing consistency with `@nkp/maybe`
 
 ### Changed
 

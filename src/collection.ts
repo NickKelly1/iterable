@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Maybe, None, Some } from '@nkp/maybe';
+import { Maybe, MaybeLike, NoneLike, SomeLike } from '@nkp/maybe';
 import { smartSort, toBetweenable, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
 import { Iterateable, Orderable, Betweenable, Unary, BetweenableObject } from './types';
@@ -230,7 +230,7 @@ export class Collection<T> implements ICollection<T> {
    * @param callbackfn
    * @returns
    */
-  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): Collection<U> {
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => MaybeLike<U>): Collection<U> {
     const collected: U[] = [];
     const to = this.items.length;
     for (let i = 0; i < to; i += 1) {
@@ -244,13 +244,13 @@ export class Collection<T> implements ICollection<T> {
   /**
    * Pick only the Some values
    */
-  flatSome<U>(this: Collection<Some<U>>): Collection<U>
-  flatSome<U>(this: Collection<Maybe<U>>): Collection<U>
-  flatSome(this: Collection<None>): Collection<never>
-  flatSome<U>(this: Collection<Maybe<U>>): Collection<U> {
+  flatSome<U>(this: Collection<SomeLike<U>>): Collection<U>
+  flatSome<U>(this: Collection<MaybeLike<U>>): Collection<U>
+  flatSome(this: Collection<NoneLike>): Collection<never>
+  flatSome<U>(this: Collection<MaybeLike<U>>): Collection<U> {
     return this
-      .filter(Maybe.isSome)
-      .map(item => item.value);
+      .filter((maybe): maybe is SomeLike<U> => maybe.isSome())
+      .map(item => item.value!);
   }
 
   /**

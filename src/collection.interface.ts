@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Maybe, None, Some } from '@nkp/maybe';
+import { Maybe, MaybeLike, NoneLike, SomeLike } from '@nkp/maybe';
 import { Betweenable, Iterateable, Orderable, SortDirection, Unary } from './types';
 
 export interface IHasAt<T> extends Iterable<T> {
@@ -48,13 +48,13 @@ export interface IHasFlatMap<T> extends Iterable<T> {
 }
 
 export interface IHasFlatSome<T> extends Iterable<T> {
-  flatSome<U>(this: IHasFlatSome<Some<U>>): IHasFlatSome<U>;
-  flatSome<U>(this: IHasFlatSome<Maybe<U>>): IHasFlatSome<U>;
-  flatSome(this: IHasFlatSome<None>): IHasFlatSome<never>;
+  flatSome<U>(this: IHasFlatSome<SomeLike<U>>): IHasFlatSome<U>;
+  flatSome<U>(this: IHasFlatSome<MaybeLike<U>>): IHasFlatSome<U>;
+  flatSome(this: IHasFlatSome<NoneLike>): IHasFlatSome<never>;
 }
 
 export interface IHasMapSome<T> extends Iterable<T> {
-  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): IHasFlatSome<U>;
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => MaybeLike<U>): IHasFlatSome<U>;
 }
 
 export interface IHasForEach<T> extends Iterable<T> {
@@ -296,11 +296,11 @@ export interface ICollection<T> extends
   filter<U extends T>(callbackfn: ((value: T, currentIndex: number) => value is U)): ICollection<U>;
   filter(callbackfn: (value: T, currentIndex: number) => boolean): ICollection<T>;
   flat<U>(this: ICollection<Iterable<U>>): ICollection<U>;
-  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): ICollection<U>;
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => MaybeLike<U>): ICollection<U>;
   flatMap<U>(callbackfn: (value: T, currentIndex: number) => Iterateable<U>): ICollection<U>;
-  flatSome<U>(this: ICollection<Some<U>>): ICollection<U>;
-  flatSome<U>(this: ICollection<Maybe<U>>): ICollection<U>;
-  flatSome(this: ICollection<None>): ICollection<never>;
+  flatSome<U>(this: ICollection<SomeLike<U>>): ICollection<U>;
+  flatSome<U>(this: ICollection<MaybeLike<U>>): ICollection<U>;
+  flatSome(this: ICollection<NoneLike>): ICollection<never>;
   lt(value: Orderable): ICollection<T>;
   lte(value: Orderable): ICollection<T>;
   gt(value: Orderable): ICollection<T>;

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Maybe, None, Some } from '@nkp/maybe';
+import { Maybe, MaybeLike, NoneLike, SomeLike } from '@nkp/maybe';
 import { smartSort, toBetweenable, toIterable } from './utils';
 import { $ANY, $TODO } from './utility-types';
 import { Betweenable, Iterateable, Orderable, SortDirection, Unary } from './types';
@@ -285,7 +285,7 @@ export class LazyCollection<T> implements ICollection<T> {
    * @param callbackfn
    * @returns
    */
-  mapSome<U>(callbackfn: (value: T, currentIndex: number) => Maybe<U>): LazyCollection<U> {
+  mapSome<U>(callbackfn: (value: T, currentIndex: number) => MaybeLike<U>): LazyCollection<U> {
     const self = this;
     const iterable = function * (): Iterable<U> {
       let i = 0;
@@ -301,12 +301,12 @@ export class LazyCollection<T> implements ICollection<T> {
   /**
    * Pick only the Some values
    */
-  flatSome<U>(this: LazyCollection<Some<U>>,): LazyCollection<U>
-  flatSome<U>(this: LazyCollection<Maybe<U>>,): LazyCollection<U>
-  flatSome(this: LazyCollection<None>,): LazyCollection<never>
-  flatSome<U>(this: LazyCollection<Maybe<U>>): LazyCollection<U> {
+  flatSome<U>(this: LazyCollection<SomeLike<U>>,): LazyCollection<U>
+  flatSome<U>(this: LazyCollection<MaybeLike<U>>,): LazyCollection<U>
+  flatSome(this: LazyCollection<NoneLike>,): LazyCollection<never>
+  flatSome<U>(this: LazyCollection<MaybeLike<U>>): LazyCollection<U> {
     return this
-      .filter(Maybe.isSome)
+      .filter((maybe): maybe is SomeLike<U> => maybe.isSome())
       .map(item => item.value);
   }
 
