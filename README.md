@@ -1136,8 +1136,8 @@ Keep values in the collection that equal any of the given values.
 ```ts
 // signature
 
-interface CollectionLike<T> {
-  pick(...values: T): CollectionLike<T>;
+interface IHasPick<T> extends Iterable<T> {
+  pick(...keep: T[]): IHasPick<T>;
 }
 ```
 
@@ -1186,7 +1186,7 @@ Concatenate an iterable onto the start of the collection.
 
 import { Iterateable } from '@nkp/iterable';
 
-export interface IHasPrecat<T> extends Iterable<T> {
+interface IHasPrecat<T> extends Iterable<T> {
   precat(precat: Iterateable<T>): IHasPrecat<T>;
 }
 ```
@@ -1196,7 +1196,7 @@ export interface IHasPrecat<T> extends Iterable<T> {
 
 import { collect } from '@nkp/iterable';
 
-collect([1, 2]).concat([3, 4]); // Collection [1, 2, 3, 4]
+collect([1, 2]).precat([3, 4]); // Collection [3, 4, 1, 2]
 ```
 
 #### push
@@ -1234,7 +1234,14 @@ Similar to `Array.prototype.reduce`.
 // signature
 
 interface IHasReduce<T> extends Iterable<T> {
-  reduce<U>(callbackfn: ((previousValue: T, currentValue: U, currentIndex: number) => U), initial: U,): U;
+  reduce<U>(
+    callbackfn: ((
+      previousValue: T,
+      currentValue: U,
+      currentIndex: number
+    ) => U),
+    initial: U,
+  ): U;
 }
 ```
 
@@ -1259,7 +1266,14 @@ Similar to `Array.prototype.reduceRight`.
 // signature
 
 interface IHasReduceRight<T> extends Iterable<T> {
-  reduceRight<U>(callbackfn: ((previousValue: T, currentValue: U, currentIndex: number) => U), initial: U,): U;
+  reduceRight<U>(
+    callbackfn: ((
+      previousValue: T,
+      currentValue: U,
+      currentIndex: number
+    ) => U),
+    initial: U,
+  ): U;
 }
 
 ```
@@ -1673,7 +1687,7 @@ The resulting collection terminates with the first input iterable.
 
 import { Iterateable } from '@nkp/iterable';
 
-export interface IHasZipShort<T> extends Iterable<T> {
+interface IHasZipShort<T> extends Iterable<T> {
   zipShort<U>(right: Iterateable<U>): IHasZipShort<[T, U]>;
 }
 ```
