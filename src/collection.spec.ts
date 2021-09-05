@@ -14,8 +14,8 @@ import { testFlatSome } from './test/flat-some.spec.util';
 import { testFlat } from './test/flat.spec.util';
 import { testForEach } from './test/for-each.spec.util';
 import { testForkFlat } from './test/fork-flat.spec.util';
-import { testForkMap } from './test/fork-map.spec.util';
-import { testForkOn } from './test/fork-on.spec.util';
+import { testAll } from './test/all.spec.util';
+import { testPartition } from './test/partition.spec.util';
 import { testGetSize } from './test/get-size.spec.util';
 import { testGt } from './test/gt.spec.util';
 import { testGte } from './test/gte.spec.util';
@@ -51,8 +51,10 @@ import { testToSet } from './test/to-set.spec.util';
 import { testUnique } from './test/unique.spec.util';
 import { testUnshift } from './test/unshift.spec.util';
 import { testZipLong } from './test/zip-long.spec.util';
-import { testZipShort } from './test/zip-short.spec.util';
+import { testZip } from './test/zip-short.spec.util';
 import { Iterateable } from './types';
+import { testCompact } from './test/compact.spec.util';
+import { testMapSelf } from './test/map-self.spec.util';
 
 describe('Collection', () => {
   it('should flatten on construction', () => {
@@ -69,6 +71,7 @@ describe('Collection', () => {
 
   testAt(create);
   testBtw(create);
+  testCompact(create);
   testConcat(create);
   testEvery(create);
   testExclude(create);
@@ -78,12 +81,10 @@ describe('Collection', () => {
   testFirst(create);
   testFlat(create);
   testFlatMap(create);
-  testMapSome(create);
   testFlatSome(create);
   testForEach(create);
   testForkFlat(create);
-  testForkMap(create);
-  testForkOn(create);
+  testAll(create);
   testGetSize(create);
   testGt(create);
   testGte(create);
@@ -92,6 +93,8 @@ describe('Collection', () => {
   testLt(create);
   testLte(create);
   testMap(create);
+  testMapSelf(create);
+  testMapSome(create);
   testMatch(create);
   testMatchFlat(create);
   testMatching(create);
@@ -99,6 +102,7 @@ describe('Collection', () => {
   testNotNull(create);
   testNotNullable(create);
   testNotUndefined(create);
+  testPartition(create);
   testPick(create);
   testPluck(create);
   testPrecat(create);
@@ -118,6 +122,6 @@ describe('Collection', () => {
   testToSet(create);
   testUnique(create);
   testUnshift(create);
+  testZip(create);
   testZipLong(create);
-  testZipShort(create);
 });

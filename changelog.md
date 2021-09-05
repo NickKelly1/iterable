@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.37 2021-09-05
+
+### Added
+
+- Added `compact`
+- Added `mapSelf`
+
+### Changed
+
+- Rename `forkFlat` to `all`
+- Rename `forkOn` to `partition`
+- Rename `zipShort` to `zip`
+
 ## 0.0.36 - 2021-09-05
 
 ### Changed

@@ -22,7 +22,7 @@ describe('e2e', () => {
       .map((ext) => ({ file, ext, }))
     )
       // group elements by their extension
-      .forkOn(({ ext, }) => ext)
+      .partition(({ ext, }) => ext)
       // map file extension and the list of files
       .mapSome((group) => group
         .at(0)

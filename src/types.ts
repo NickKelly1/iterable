@@ -4,6 +4,7 @@ import { LazyCollection } from './lazy-collection';
 export interface IterableCreator<T> {
   ():
     | Array<T>
+    | ReadonlyArray<T>
     | Collection<T>
     | Iterable<T>
     | LazyCollection<T>
@@ -13,6 +14,7 @@ export interface IterableCreator<T> {
 export type Iterateable<T> =
   | IterableCreator<T>
   | Array<T>
+  | ReadonlyArray<T>
   | Collection<T>
   | Iterable<T>
   | LazyCollection<T>

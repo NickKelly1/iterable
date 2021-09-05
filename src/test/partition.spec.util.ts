@@ -1,10 +1,10 @@
-import { IHasForkOn } from '../collection.interface';
+import { IHasPartition } from '../collection.interface';
 import { Iterateable } from '../types';
 
-function testBench(collection: IHasForkOn<string>) {
+function testBench(collection: IHasPartition<string>) {
   const regex = /^pages.*[\\/]([^\\/]*)\.([^.]*)$/;
-  const byPage = collection.forkOn((value) => value.match(regex)?.[1]);
-  const byExt = collection.forkOn((value) => value.match(regex)?.[2]);
+  const byPage = collection.partition((value) => value.match(regex)?.[1]);
+  const byExt = collection.partition((value) => value.match(regex)?.[2]);
   expect(Array
     .from(byPage)
     .map(nested => Array.from(nested)))
@@ -48,8 +48,8 @@ function testBench(collection: IHasForkOn<string>) {
     ]);
 }
 
-export function testForkOn(create: <T>(iterable: Iterateable<T>) => IHasForkOn<T>): void {
-  describe('forkOn(...)', () => {
+export function testPartition(create: <T>(iterable: Iterateable<T>) => IHasPartition<T>): void {
+  describe('partition(...)', () => {
     describe('should work on', () => {
       it('array', () => {
         const collection = create([

@@ -24,6 +24,7 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
   - [Methods](#methods)
     - [at](#at)
     - [btw](#btw)
+    - [compact](#compact)
     - [concat](#concat)
     - [every](#every)
     - [exclude](#exclude)
@@ -38,7 +39,6 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
     - [forkFlat](#forkflat)
     - [forkMap](#forkmap)
     - [getSize](#getsize)
-    - [forkOn](#forkon)
     - [getSize](#getsize)
     - [gt](#gt)
     - [gte](#gte)
@@ -55,6 +55,7 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
     - [notNull](#notnull)
     - [notNullable](#notnullable)
     - [notUndefined](#notundefined)
+    - [partition](#forkon)
     - [pick](#pick)
     - [pluck](#pluck)
     - [precat](#precat)
@@ -74,8 +75,8 @@ The `Collection` class performs faster than the native JavaScript `Array` class 
     - [toSet](#toset)
     - [unique](#unique)
     - [unshift](#unshift)
+    - [zip](#zip)
     - [zipLong](#ziplong)
-    - [zipShort](#zipshort)
 - [Publishing a new version](#publishing-a-new-version)
 
 ## Installation
@@ -210,6 +211,70 @@ lazy.at(1);       // cached results are returned, transformations do not run aga
 
 ### Methods
 
+#### all
+
+Split the collection and operate on it's parts independently then join the results into a tuple (array) and return a single-valued collection with the tuple as it's only value.
+
+Similar to `Promise.all`, but for collections.
+
+```ts
+// signature
+
+interface IHasForkMap<T> extends Iterable<T> {
+  forkMap<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): IHasForkMap<{ [K in keyof M]: ReturnType<M[K]> }>;
+  forkMap<R1>(...splits: readonly [Unary<this, R1>]): IHasForkMap<[R1]>
+  forkMap<R1, R2>(...splits: readonly [Unary<this, R1>, Unary<this, R2>]): IHasForkMap<[R1, R2]>
+  forkMap<R1, R2, R3>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>]): IHasForkMap<[R1, R2, R3]>
+  forkMap<R1, R2, R3, R4>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>]): IHasForkMap<[R1, R2, R3, R4]>
+  forkMap<R1, R2, R3, R4, R5>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>]): IHasForkMap<[R1, R2, R3, R4, R5]>
+  forkMap<R1, R2, R3, R4, R5, R6>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>]): IHasForkMap<[R1, R2, R3, R4, R5, R6]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14]>
+  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>, Unary<this, R15>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
+  forkMap<R>(...splits: readonly (Unary<this, R>)[]): IHasForkMap<R[]>;
+}
+```
+
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+const collection = collect(['index.html', 'script.js', 'style.css']);
+
+collection
+  .forkMap(
+    (html) => html.matching(/\.html$/),
+    (scripts) => scripts.matching(/\.js$/),
+    (styles) => styles.matching(/\.css$/),
+  )
+  /**
+   * 
+   * Collection [[
+   *  Collection ['index.html'],
+   *  Collection ['script.js'],
+   *  Collection ['style.css']
+   * ]]
+   */
+  .first()
+  /**
+   * Some [[
+   *  Collection ['index.html'],
+   *  Collection ['script.js'],
+   *  Collection ['style.css']
+   * ]]
+   */
+  .map(([html, scripts, stypes]) => {
+    // ...
+  })
+```
+
 #### at
 
 Get the value at a specified index.
@@ -286,6 +351,28 @@ dates.btw(
 //
 ```
 
+#### compact
+
+Remove falsy values from the collection.
+
+```ts
+// signature
+
+interface IHasCompact<T> extends Iterable<T> {
+  compact(): IHasCompact<NonNullable<T>>;
+}
+```
+
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+const collection: Collection<number> = collect([1, null, undefined, false, 0, 3]);
+
+collection.notNullable(); // Collection [1, 3]
+```
+
 #### concat
 
 Concatenate an iterable onto the end of the collection.
@@ -343,7 +430,7 @@ Removes values from the collection that equal any of the given values.
 // signature
 
 interface IHasExclude<T> extends Iterable<T> {
-  exclude(...remove: T[]): IHasExclude<T>;
+  exclude(...remove: readonly T[]): IHasExclude<T>;
 }
 ```
 
@@ -495,6 +582,8 @@ Similar to `Array.prototype.flatMap`.
 ```ts
 // signature
 
+import { Iterateable } from '@nkp/iterable';
+
 interface IHasFlatMap<T> extends Iterable<T> {
   flatMap<U>(callbackfn: (value: T, currentIndex: number) => Iterateable<U>): IHasFlatMap<U>;
 }
@@ -574,6 +663,8 @@ Fork the collection to split and operate on it's parts independently then flatte
 ```ts
 // signature
 
+import { Iterateable } from '@nkp/iterable';
+
 interface IHasForkFlat<T> extends Iterable<T> {
   forkFlat<R>(...forks: readonly (Unary<this, Iterateable<R>>)[]): IHasForkFlat<R>;
 }
@@ -597,120 +688,6 @@ collection.forkFlat(
   //  'public/scripts/script.js',
   //  'public/styles/style.css'
   // ]
-```
-
-#### forkMap
-
-Fork the collection to split and operate on it's parts independently then join the results into a tuple (array) and return a single-valued collection with the tuple as it's only value.
-
-Similar to `Promise.all`, but for collections.
-
-```ts
-// signature
-
-interface IHasForkMap<T> extends Iterable<T> {
-  forkMap<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): IHasForkMap<{ [K in keyof M]: ReturnType<M[K]> }>;
-  forkMap<R1>(...splits: readonly [Unary<this, R1>]): IHasForkMap<[R1]>
-  forkMap<R1, R2>(...splits: readonly [Unary<this, R1>, Unary<this, R2>]): IHasForkMap<[R1, R2]>
-  forkMap<R1, R2, R3>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>]): IHasForkMap<[R1, R2, R3]>
-  forkMap<R1, R2, R3, R4>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>]): IHasForkMap<[R1, R2, R3, R4]>
-  forkMap<R1, R2, R3, R4, R5>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>]): IHasForkMap<[R1, R2, R3, R4, R5]>
-  forkMap<R1, R2, R3, R4, R5, R6>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>]): IHasForkMap<[R1, R2, R3, R4, R5, R6]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14]>
-  forkMap<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>, Unary<this, R4>, Unary<this, R5>, Unary<this, R6>, Unary<this, R7>, Unary<this, R8>, Unary<this, R9>, Unary<this, R10>, Unary<this, R11>, Unary<this, R12>, Unary<this, R13>, Unary<this, R14>, Unary<this, R15>]): IHasForkMap<[R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15]>
-  forkMap<R>(...splits: readonly (Unary<this, R>)[]): IHasForkMap<R[]>;
-}
-```
-
-```ts
-// usage
-
-import { collect } from '@nkp/iterable';
-
-const collection = collect(['index.html', 'script.js', 'style.css']);
-
-collection
-  .forkMap(
-    (html) => html.matching(/\.html$/),
-    (scripts) => scripts.matching(/\.js$/),
-    (styles) => styles.matching(/\.css$/),
-  )
-  /**
-   * 
-   * Collection [[
-   *  Collection ['index.html'],
-   *  Collection ['script.js'],
-   *  Collection ['style.css']
-   * ]]
-   */
-  .first()
-  /**
-   * Some [[
-   *  Collection ['index.html'],
-   *  Collection ['script.js'],
-   *  Collection ['style.css']
-   * ]]
-   */
-  .map(([html, scripts, stypes]) => {
-    // ...
-  })
-```
-
-#### forkOn
-
-Fork the collection into nested collections based on the value returned by the callback.
-
-```ts
-// signature
-
-interface IHasForkOn<T> extends Iterable<T> {
-  forkOn<R>(callbackfn: ((value: T, index: number) => R)): IHasForkOn<IHasForkOn<T>>;
-}
-```
-
-```ts
-// usage
-
-import { collect } from '@nkp/iterable';
-
-const collection = collect([
-  'contact/index.html',
-  'contact/script.js',
-  'contact/style.css',
-  'about/index.html',
-  'about/script.js',
-  'about/style.css',
-]);
-
-collection
-  .forkOn(
-    // fork on the directory name
-    (html) => html.match(/(.*)[\\/][^\\/\.]*\.html$/).first().value,
-    (scripts) => scripts.match(/(.*)[\\/][^\\/\.]*\.js$/).first().value,
-    (styles) => styles.match(/(.*)[\\/][^\\/\.]*\.css$/).first().value,
-  )
-  /**
-   * 
-   * Collection [
-   *  Collection [
-   *    'contact/index.html'
-   *    'contact/script.js'
-   *    'contact/style.css'
-   *  ],
-   *  Collection [
-   *    'about/index.html'
-   *    'about/script.js'
-   *    'about/style.css'
-   *  ],
-   * ]
-   */
 ```
 
 #### getSize
@@ -905,6 +882,28 @@ const collection = collect([1, 2, 3]);
 collection.map(n => n + 1); // Collection [1, 2, 3]
 ```
 
+#### mapSelf
+
+Map the collection instance itself.
+
+```ts
+// signature
+
+interface IHasMapSelf<T> extends Iterable<T> {
+  mapSelf<U>(callbackfn: ((self: this) => U)): U;
+}
+```
+
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+const collection = collect([1, 2, 3]);
+
+collection.mapSelf(self => Array.from(self)[0]); // 1
+```
+
 #### mapSome
 
 Map into a `Maybe` and filter and flatten the value back into a collection.
@@ -986,7 +985,7 @@ Only keeps successful matches.
 ```ts
 // signature
 
-export interface IHasMatchFlat<T> extends Iterable<T> {
+interface IHasMatchFlat<T> extends Iterable<T> {
   matchFlat(regexp: string | RegExp): IHasMatch<RegExpMatchArray>;
 }
 ```
@@ -1129,6 +1128,59 @@ const collection = collect([1, undefined, 3]);
 collection.notUndefined(); // Collection [1, 3]
 ```
 
+#### partition
+
+Partition the collection grouping by callback return value
+
+```ts
+// signature
+
+interface IHasPartition<T> extends Iterable<T> {
+  partition<R>(callbackfn: ((
+    value: T,
+    index: number
+  ) => R)): IHasPartition<IHasPartition<T>>;
+}
+```
+
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+const collection = collect([
+  'contact/index.html',
+  'contact/script.js',
+  'contact/style.css',
+  'about/index.html',
+  'about/script.js',
+  'about/style.css',
+]);
+
+collection
+  .partition(
+    // fork on the directory name
+    (html) => html.match(/(.*)[\\/][^\\/\.]*\.html$/).first().value,
+    (scripts) => scripts.match(/(.*)[\\/][^\\/\.]*\.js$/).first().value,
+    (styles) => styles.match(/(.*)[\\/][^\\/\.]*\.css$/).first().value,
+  )
+  /**
+   * 
+   * Collection [
+   *  Collection [
+   *    'contact/index.html'
+   *    'contact/script.js'
+   *    'contact/style.css'
+   *  ],
+   *  Collection [
+   *    'about/index.html'
+   *    'about/script.js'
+   *    'about/style.css'
+   *  ],
+   * ]
+   */
+```
+
 #### pick
 
 Keep values in the collection that equal any of the given values.
@@ -1137,7 +1189,7 @@ Keep values in the collection that equal any of the given values.
 // signature
 
 interface IHasPick<T> extends Iterable<T> {
-  pick(...keep: T[]): IHasPick<T>;
+  pick(...keep: readonly T[]): IHasPick<T>;
 }
 ```
 
@@ -1628,7 +1680,7 @@ Similar to `Array.prototype.shift`.
 // signature
 
 interface IHasUnshift<T> extends Iterable<T> {
-  unshift(...unshifted: T[]): IHasUnshift<T>;
+  unshift(...unshifted: readonly T[]): IHasUnshift<T>;
 }
 ```
 
@@ -1640,6 +1692,37 @@ import { collect } from '@nkp/iterable';
 const collection = collect([1, 2, 3]);
 
 collection.shift(-1, -2, -3); // Collection [-1, -2, -3, 1, 2, 3]
+```
+
+#### zip
+
+Join the collection with an iterable, by index.
+
+The resulting collection terminates with the first input iterable.
+
+```ts
+// signature
+
+import { Iterateable } from '@nkp/iterable';
+
+interface IHasZip<T> extends Iterable<T> {
+  zip<U>(right: Iterateable<U>): IHasZipShort<[T, U]>;
+}
+```
+
+```ts
+// usage
+
+import { collect } from '@nkp/iterable';
+
+const collection = collect([1, 2, 3]);
+
+collection.zip([-1, -2, -3, -4]);
+// Collection<[
+//  [1, -1,],
+//  [2, -2,],
+//  [3, -3,],
+// ]>
 ```
 
 #### zipLong
@@ -1673,37 +1756,6 @@ collection.zipLong([-1, -2, -3, -4]);
 //  [Some<2>, Some<-2>,],
 //  [Some<3>, Some<-3>,],
 //  [None, Some<-4>,],
-// ]>
-```
-
-#### zipShort
-
-Join the collection with an iterable, by index.
-
-The resulting collection terminates with the first input iterable.
-
-```ts
-// signature
-
-import { Iterateable } from '@nkp/iterable';
-
-interface IHasZipShort<T> extends Iterable<T> {
-  zipShort<U>(right: Iterateable<U>): IHasZipShort<[T, U]>;
-}
-```
-
-```ts
-// usage
-
-import { collect } from '@nkp/iterable';
-
-const collection = collect([1, 2, 3]);
-
-collection.zipLong([-1, -2, -3, -4]);
-// Collection<[
-//  [1, -1,],
-//  [2, -2,],
-//  [3, -3,],
 // ]>
 ```
 

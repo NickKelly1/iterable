@@ -1,13 +1,13 @@
-import { IHasForkMap } from '../collection.interface';
+import { IHasAll } from '../collection.interface';
 import { Iterateable } from '../types';
 
-export function testForkMap(create: <T>(iterable: Iterateable<T>) => IHasForkMap<T>): void {
-  describe('forkMap(...)', () => {
+export function testAll(create: <T>(iterable: Iterateable<T>) => IHasAll<T>): void {
+  describe('all(...)', () => {
     describe('should work on', () => {
       it('array', () => {
         const collection = create([1, 2, 3,]);
         const called: [number[], Set<number>, number[], number[]][] = Array.from(collection
-          .forkMap(
+          .all(
             // x2
             c => Array.from(c).map(n => n * 2),
             // square
@@ -28,7 +28,7 @@ export function testForkMap(create: <T>(iterable: Iterateable<T>) => IHasForkMap
       it('set', () => {
         const collection = create(new Set([1, 2, 3,]));
         const called: [number[], Set<number>, number[], number[]][] = Array.from(collection
-          .forkMap(
+          .all(
             // x2
             c => Array.from(c).map(n => n * 2),
             // square
@@ -50,7 +50,7 @@ export function testForkMap(create: <T>(iterable: Iterateable<T>) => IHasForkMap
         const map = new Map<number, number>([[1, 1,], [2, 2,], [3, 3,],]);
         const collection = create(map);
         const called: [number[][], Set<number[]>, number[][], number[][]][] = Array.from(collection
-          .forkMap(
+          .all(
             // x2
             c => Array.from(c).map(n => n.map(n2 => n2 * 2)),
             // square
@@ -73,7 +73,7 @@ export function testForkMap(create: <T>(iterable: Iterateable<T>) => IHasForkMap
           yield 1; yield 2; yield 3;
         });
         const called: [number[], Set<number>, number[], number[]][] = Array.from(collection
-          .forkMap(
+          .all(
             // x2
             c => Array.from(c).map(n => n * 2),
             // square
