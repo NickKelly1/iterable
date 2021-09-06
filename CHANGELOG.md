@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.41 2021-09-05
+
+### Changed
+
+- Updated dependencies
+
 ## 0.0.40 2021-09-05
 
 ### Changed

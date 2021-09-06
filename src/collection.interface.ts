@@ -222,7 +222,7 @@ export interface IHasForkFlat<T> extends Iterable<T> {
 }
 
 export interface IHasAll<T> extends Iterable<T> {
-  all<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): IHasAll<{ [K in keyof M]: ReturnType<M[K]> }>;
+  all<M extends Record<PropertyKey, Unary<this, unknown>>>(splits: M): IHasAll<{ [K in keyof M]: ReturnType<M[K]> }>;
   all<R1>(...splits: readonly [Unary<this, R1>]): IHasAll<[R1]>
   all<R1, R2>(...splits: readonly [Unary<this, R1>, Unary<this, R2>]): IHasAll<[R1, R2]>
   all<R1, R2, R3>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>]): IHasAll<[R1, R2, R3]>
@@ -339,7 +339,7 @@ export interface ICollection<T> extends
   zip<U>(right: Iterateable<U>): ICollection<[T, U]>;
   partition<R>(callbackfn: ((value: T, index: number) => R)): ICollection<ICollection<T>>;
   forkFlat<R>(...forks: readonly (Unary<this, Iterateable<R>>)[]): ICollection<R>;
-  all<M extends Record<PropertyKey, Unary<this, unknown>>>(forks: M): ICollection<{ [K in keyof M]: ReturnType<M[K]> }>;
+  all<M extends Record<PropertyKey, Unary<this, unknown>>>(splits: M): ICollection<{ [K in keyof M]: ReturnType<M[K]> }>;
   all<R1>(...splits: readonly [Unary<this, R1>]): ICollection<[R1]>
   all<R1, R2>(...splits: readonly [Unary<this, R1>, Unary<this, R2>]): ICollection<[R1, R2]>
   all<R1, R2, R3>(...splits: readonly [Unary<this, R1>, Unary<this, R2>, Unary<this, R3>]): ICollection<[R1, R2, R3]>

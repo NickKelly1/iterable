@@ -161,7 +161,7 @@ export class Collection<T> implements ICollection<T> {
       Object.keys(mapping).map(key => {
         mappedResults[key] = mapping[key]!(this);
       });
-      return new Collection([mapping,]);
+      return new Collection([mappedResults,]);
     }
 
     const zeroFn = mapOrFunction as Unary<this, unknown>;
