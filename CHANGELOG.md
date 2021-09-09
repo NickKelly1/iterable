@@ -1,30 +1,38 @@
 # Changelog
 
-## 0.0.41 2021-09-05
+## 1.0.0 - 2021-09-08
+
+Launched stable version v1.0.0
 
 ### Changed
 
 - Updated dependencies
 
-## 0.0.40 2021-09-05
+## 0.0.41 - 2021-09-05
+
+### Changed
+
+- Updated dependencies
+
+## 0.0.40 - 2021-09-05
 
 ### Changed
 
 - Updated readme.md
 
-## 0.0.39 2021-09-05
+## 0.0.39 - 2021-09-05
 
 ### Changed
 
 - Updated readme.md
 
-## 0.0.38 2021-09-05
+## 0.0.38 - 2021-09-05
 
 ### Changed
 
 - Updated readme.md
 
-## 0.0.37 2021-09-05
+## 0.0.37 - 2021-09-05
 
 ### Added
 
