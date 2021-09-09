@@ -1,7 +1,7 @@
 {
   "name": "@nkp/iterable",
   "sideEffects": false,
-  "version": "0.0.41",
+  "version": "1.0.0",
   "description": "Iteration utility for synchronous iterators like arrays, sets, maps and generators.",
   "main": "cjs/index.js",
   "module": "es/index.js",
